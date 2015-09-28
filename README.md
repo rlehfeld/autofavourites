@@ -28,8 +28,3 @@ regexp1|regexp2|regexp3
 ```
 
 You can test your regular expressions and learn a little bit here http://pythex.org/.
-
-ChangeLog
-------------
-0.2.0
-Change Config File delimiter from = to == to prevent mismatch with regexp.
