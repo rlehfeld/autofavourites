@@ -9,8 +9,9 @@ Usage
 ------------
 Create a file /etc/autoFavourites.cfg with content as example:
 ```
-Documentaries=Animal Planet|Discovery Channel|H2|National Geographic|The History Channel|Nat Geo
-Movies and Series=AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount|Prime Box|Sony|Space|Studio
+Documentaries==Animal Planet|Discovery Channel|H2|National Geographic|The History Channel|Nat Geo
+Movies and Series==AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount|Prime Box|Sony|Space|Studio Universal|Syfy|TBS|TCM|^Telecine|TNT|Universal Channel|^Warner
+Varieties==(?=Discovery)(?!Discovery Channel|Discovery Kids)|E!|Fox Life|Glitz|GNT|Ideal TV|Lifetime|MTV|Multishow|OFF|TLC|truTV|Viva|WooHoo
 ```
 
 Syntax is:
@@ -23,6 +24,12 @@ endwith$
 ^exact$
 contains
 regexp1|regexp2|regexp3
+(?=contains)(?!butnotequal|butnotequal)
 ```
 
 You can test your regular expressions and learn a little bit here http://pythex.org/.
+
+ChangeLog
+------------
+0.2.0
+Change Config File delimiter from = to == to prevent mismatch with regexp.

@@ -49,7 +49,7 @@ def genfavindex():
 
     filerules = open(rules)
     for rule in filerules:
-        favname, channellist = rule.split("=")
+        favname, channellist = rule.split("==")
         favfilename = mkfavfilename(favname)
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % favfilename)
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
@@ -64,7 +64,7 @@ def genfav():
     filerules = open(rules)
     for rule in filerules:
         rule = rule.rstrip()
-        favname, channellist = rule.split("=")
+        favname, channellist = rule.split("==")
         favfilename = mkfavfilename(favname)
         favfile = open(outdir + '/' + favfilename, 'w')
         favfile.write("#NAME " + favname + "\n")
