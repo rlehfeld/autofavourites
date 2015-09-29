@@ -103,7 +103,7 @@ def genfav():
 
         filelamedb.close()
 
-        channels = sorted(channels, key=lambda channel: channel['channelname'])
+        channels = sorted(channels, key=lambda channel: channel['channelname'].lower())
         for channel in channels:
             favfile.write("#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:" % channel + "\n")
 
