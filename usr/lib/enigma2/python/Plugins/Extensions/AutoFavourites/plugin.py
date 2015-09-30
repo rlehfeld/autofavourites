@@ -2,7 +2,7 @@
 #
 #    Plugin for Enigma2
 #    version:
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
 #    as published by the Free Software Foundation; either version 2
@@ -24,9 +24,9 @@ AUTO_FAVOURITES = "python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavouri
 
 def main(session,**kwargs):
 	parts = [
-		(_("Automatic scan"), 0, session),
-		(_("Add to bouquet"), 1, session),
-		(_("Exit"), 2, session)
+		(_("Automatic scan"), "scan", session),
+		(_("Add to bouquet"), "generate", session),
+		(_("Exit"), "exit", session)
 	]
 
 	text = APP_NAME + " " + VERSION
@@ -36,12 +36,11 @@ def menuDone(option):
 	if option is None:
 		return
 	(description, choice, session) = option
-
-	if choice == 0:
+	if choice is "scan":
 		fastScan(session)
-	elif choice == 1:
+	elif choice is "generate":
 		genFav(session)
-	elif choice == 2:
+	elif choice is "exit":
 		session.close
 
 def fastScan(session):
@@ -49,17 +48,11 @@ def fastScan(session):
 	session.open(ScanSimple)
 
 def genFav(session):
-	text = APP_NAME
-	cmd = AUTO_FAVOURITES
-	session.openWithCallback(consoleClosed,Console,text,[cmd])
-
-def consoleClosed(answer=None):
-	return
+	session.open(Console,APP_NAME,[AUTO_FAVOURITES])
 
 def Plugins(**kwargs):
     return PluginDescriptor(
         name="AutoFavourites",
         description="Generate favourites based on a config file",
         where = PluginDescriptor.WHERE_PLUGINMENU,
-        icon="plugin.png",
         fnc=main)

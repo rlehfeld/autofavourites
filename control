@@ -1,5 +1,5 @@
 Package: enigma2-plugin-extensions-autofavourites
-Version: 0.2.1
+Version: 0.2.2
 Description: Generate favourites based on a config file
 Section: base
 Priority: optional
@@ -9,3 +9,4 @@ Architecture: mips32el
 OE: enigma2-plugins
 Homepage: http://github.com/lazaronixon/autofavourites
 Source: http://github.com/lazaronixon/autofavourites
+Depends: enigma2
