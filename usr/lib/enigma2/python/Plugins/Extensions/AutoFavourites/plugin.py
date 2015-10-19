@@ -18,37 +18,81 @@ VERSION = "0.2.2"
 from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
+from Screens.MessageBox import MessageBox
+#from enigma import quitMainloop
+from Screens.Standby import TryQuitMainloop
 
 APP_NAME = "AutoFavourites"
 AUTO_FAVOURITES = "python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/autoFavourites.py"
+UPDATE_SATELLITE = "python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/updateSatellites.py"
 
-def main(session,**kwargs):
-	parts = [
-		(_("Automatic scan"), "scan", session),
-		(_("Add to bouquet"), "generate", session),
-		(_("Exit"), "exit", session)
-	]
+class AutoFavourites:
 
-	text = APP_NAME + " " + VERSION
-	session.openWithCallback(menuDone, ChoiceBox, title = text, list = parts)
+	def __init__(self, session):
+		self.session = session
+		self.global_title = APP_NAME + " " + VERSION
+		self.menu_options = [
+			(_("Automatic scan"), "scan"),
+			(_("Add to bouquet"), "generate"),
+			(_("Update") + " satellite.xml", "update"),
+			(_("Exit"), "exit")
+		]
+		self.sat_options = [
+			("OE-Alliance", "source1"),
+			("South America 1", "source2"),
+			("South America 2", "source3")
+		]
+		self.openMenu()
 
-def menuDone(option):
-	if option is None:
-		return
-	(description, choice, session) = option
-	if choice is "scan":
-		fastScan(session)
-	elif choice is "generate":
-		genFav(session)
-	elif choice is "exit":
-		session.close
+	def openMenu(self):
+		self.session.openWithCallback(self.menuDone, ChoiceBox, title = self.global_title, list = self.menu_options)
 
-def fastScan(session):
-	from Screens.ScanSetup import *
-	session.open(ScanSimple)
+	def menuDone(self, option):
+		if option is None:
+			return
 
-def genFav(session):
-	session.open(Console,APP_NAME,[AUTO_FAVOURITES])
+		(description, choice) = option
+		if choice is "scan":
+			self.fastScan()
+		elif choice is "generate":
+			self.genFav()
+		elif choice is "update":
+			self.session.openWithCallback(self.menuDoneSat, ChoiceBox, title = self.global_title, list = self.sat_options)
+		elif choice is "exit":
+			self.session.close
+
+	def menuDoneSat(self, option):
+		if option is None:
+			self.openMenu()
+			return
+
+		(description, choice) = option
+		if choice is "source1":
+			self.updateSat('1')
+		elif choice is "source2":
+			self.updateSat('2')
+		elif choice is "source3":
+			self.updateSat('3')
+
+	def fastScan(self):
+		from Screens.ScanSetup import *
+		self.session.openWithCallback(self.openMenu, ScanSimple)
+
+	def genFav(self):
+		self.session.openWithCallback(self.openMenu, Console, self.global_title, [AUTO_FAVOURITES])
+
+	def updateSat(self, source):
+		self.session.openWithCallback(self.restartGUI, Console, self.global_title, [UPDATE_SATELLITE + " " + source])
+
+	def restartGUI(self):
+		self.session.open(TryQuitMainloop, 3)
+		return False
+
+###############################################################################
+def main(session, **kwargs):
+	AutoFavourites(session)
+
+###############################################################################
 
 def Plugins(**kwargs):
     return PluginDescriptor(

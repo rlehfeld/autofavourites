@@ -119,7 +119,6 @@ def gendefaultfav():
     favradioallfile.close()
 
 def log(msg):
-    statusmsg = msg
     sys.stdout.write(msg)
     sys.stdout.flush()
 
