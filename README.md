@@ -44,6 +44,6 @@ Variedades==Globosat|A&E|Arte 1|^BIS$|Comedy Central|Curta!|(?=Discovery)(?!Disc
 ```
 
 #Screenshots
-![image1](https://raw.githubusercontent.com/lazaronixon/autofavourites/master/screenshots/image1.png)
-![image2](https://raw.githubusercontent.com/lazaronixon/autofavourites/master/screenshots/image2.png)
-![image3](https://raw.githubusercontent.com/lazaronixon/autofavourites/master/screenshots/image3.png)
+![image1](https://raw.githubusercontent.com/lazaronixon/autofavourites/master/screenshots/image1.jpg)
+![image2](https://raw.githubusercontent.com/lazaronixon/autofavourites/master/screenshots/image2.jpg)
+![image3](https://raw.githubusercontent.com/lazaronixon/autofavourites/master/screenshots/image3.jpg)
