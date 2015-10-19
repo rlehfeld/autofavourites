@@ -1,5 +1,6 @@
 # AutoFavourites
 Everyone knows how is boring when channels change and you get a "UNKNOWN" on your Favourites. AutoFavourites Plugin can generate favourites based on a configuration file and channel names.
+Is possible too update satellites.xml from OE-Alliance or other sources.
 
 Installation
 ------------
