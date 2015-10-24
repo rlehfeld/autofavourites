@@ -1,5 +1,5 @@
 Package: enigma2-plugin-extensions-autofavourites
-Version: 0.2.2
+Version: 0.2.3
 Description: Generate favourites based on a config file
 Section: base
 Priority: optional
