@@ -1,7 +1,7 @@
 # AutoFavourites
 Everyone knows how is boring when channels change and you get a "UNKNOWN" on your Favourites.
 AutoFavourites Plugin can generate favourites based on a configuration file and channel names.
-If you use EPGRefresh AutoFavourites generate a Favourite with one channel for each transponder.
+If you use EPGRefresh, AutoFavourites generate a Favourite with one channel for each transponder.
 Is possible too update satellites.xml from OE-Alliance or other sources.
 
 ##Installation
@@ -13,6 +13,7 @@ Create a file /etc/autoFavourites.cfg with content as example:
 Documentaries==Animal Planet|Discovery Channel|H2|National Geographic|The History Channel|Nat Geo
 Movies and Series==AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount|Prime Box|Sony|Space|Studio Universal|Syfy|TBS|TCM|^Telecine|TNT|Universal Channel|^Warner
 Varieties==(?=Discovery)(?!Discovery Channel|Discovery Kids)|E!|Fox Life|Glitz|GNT|Ideal TV|Lifetime|MTV|Multishow|OFF|TLC|truTV|Viva|WooHoo
+EPGRefresh==^(?!TVEXEC|TVTEC|Teste)\w*
 ```
 
 Syntax is:
@@ -43,6 +44,7 @@ Infantis==Boomerang|Cartoon Network|Discovery Kids|^Disney|^Gloob|^Nick|Play TV|
 Noticias==^CNN|CNT|GloboNews|Record News|Band News
 Publico==Canal Claro|Canal Rural|Futura|NBR|Polishop|Rede Brasil|RIT|Terra Viva|TV Brasil|TV Câmara|TV Escola|TV Justiça|TV Senado
 Variedades==Globosat|A&E|Arte 1|^BIS$|Comedy Central|Curta!|(?=Discovery)(?!Discovery Channel|Discovery Kids)|E!|Fox Life|Glitz|GNT|Ideal TV|Lifetime|MTV|Multishow|Music Box Brazil|OFF|TLC|truTV|^Viva|WooHoo
+EPGRefresh==^(?!TVEXEC|TVTEC|Teste)\w*
 ```
 
 #Screenshots

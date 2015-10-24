@@ -53,7 +53,6 @@ def genfavindex():
         favfilename = mkfavfilename(favname)
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % favfilename)
 
-    favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.epgrefresh.tv" ORDER BY bouquet\n')
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
     favindexfile.close()
 
@@ -72,24 +71,34 @@ def genfav():
         favfile.write("#NAME " + favname + "\n")
 
         channels = []
-        prevline = None
+        tpcodes = []
+        serviceid = None
         servicesarea = False
-        regex = re.compile(channellist, re.IGNORECASE)
+        regexchannel = re.compile(channellist, re.IGNORECASE)
+        regexid = re.compile('^.{4}:.{8}:.{4}')
         filelamedb = open(lamedb)
         for line in filelamedb:
             line = line.rstrip()
 
             if (line == 'services'):
                 servicesarea = True
+                continue
 
             if (servicesarea and line == 'end'):
                 servicesarea = False
 
-            if (not servicesarea or line.startswith('p:')):
+            if (not servicesarea):
                 continue
 
-            if regex.search(line):
-                servicesplit = prevline.split(':')
+            if line.startswith('p:'):
+                continue
+
+            if regexid.match(line):
+                serviceid = line
+                continue
+
+            if regexchannel.match(line):
+                servicesplit = serviceid.split(':')
                 channel = {
                     'channelname':   line,
                     'channelcode':   servicesplit[0],
@@ -100,8 +109,15 @@ def genfav():
                 }
 
                 channel = formatchannel(channel)
-                channels.append(channel)
-            prevline = line
+
+                if (favname.lower() == 'epgrefresh'):
+                    istvchannel = channel['channeltype'] in ('1', '19')
+                    isuniquetp = (not (channel['tpcode'] in tpcodes))
+                    if (istvchannel and isuniquetp):
+                        tpcodes.append(channel['tpcode'])
+                        channels.append(channel)
+                else:
+                    channels.append(channel)
 
         filelamedb.close()
 
@@ -110,42 +126,6 @@ def genfav():
             favfile.write("#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:" % channel + "\n")
 
         favfile.close()
-
-def genepgrefreshfav():
-    servicesarea = False
-    tpcodes = []
-    filelamedb = open(lamedb)
-    favepgrefresh = open(outdir + '/userbouquet.epgrefresh.tv', 'w')
-    favepgrefresh.write("#NAME EPGRefresh\n")
-    for line in filelamedb:
-        line = line.rstrip()
-        if (line == 'services'):
-            servicesarea = True
-
-        if (servicesarea and line == 'end'):
-            servicesarea = False
-
-        if (not servicesarea or line.startswith('p:')):
-            continue
-
-        if re.match('^.{4}:.{8}:.{4}', line):
-            servicesplit = line.split(':')
-            channel = {
-                'channelname':   line,
-                'channelcode':   servicesplit[0],
-                'tpcode':        servicesplit[1],
-                'code2':         servicesplit[2],
-                'code3':         servicesplit[3],
-                'channeltype':   servicesplit[4]
-            }
-            channel = formatchannel(channel)
-            istvchannel = channel['channeltype'] in ('1', '19')
-            isuniquetp = (not (channel['tpcode'] in tpcodes))
-            if (istvchannel and isuniquetp):
-                favepgrefresh.write("#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:" % channel + "\n")
-                tpcodes.append(channel['tpcode'])
-
-    favepgrefresh.close()
 
 def gendefaultfav():
     favtvallfile = open(outdir + '/userbouquet.favourites.tv', 'w')
@@ -169,8 +149,6 @@ def main():
     gendefaultfav()
     log('Generating favourites...\n')
     genfav()
-    log('Generating EPGRefresh favourite...\n')
-    genepgrefreshfav()
     log('Reloading...\n')
     reload()
 
