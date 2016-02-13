@@ -39,7 +39,7 @@ Abertos==^Globo |Aparecida|^Canção Nova|Bandeirantes|Rede Record|Rede TV|Rede 
 Documentários==Animal Planet|Discovery Channel|H2|National Geographic|The History Channel|Nat Geo|NatGeo
 Esportes==Band Alternativo|Band Sports|Bandsports|Combate|^ESPN|^Fox Sports|Premiere|^SporTV|^Ei Maxx
 Filmes e Séries==AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount|Prime Box|Sony|Space|Studio Universal|Syfy|TBS|TCM|^Telecine|TNT|Universal Channel|^Warner
-Internacional==^NHK|^RAI$|^SIC|TV España|TV5 Monde|Deutsche Welle|^DW
+Internacional==^NHK|^RAI$|^SIC|TV España|TV5 Monde|Deutsche Welle|^DW|^TVE$
 Infantis==Boomerang|Cartoon Network|Discovery Kids|^Disney|^Gloob|^Nick|Play TV|Tooncast|TV Rá Tim Bum
 Noticias==^CNN|CNT|GloboNews|Record News|Band News
 Publico==Canal Claro|Canal Rural|Futura|NBR|Polishop|Rede Brasil|RIT|Terra Viva|TV Brasil|TV Câmara|TV Escola|TV Justiça|TV Senado
