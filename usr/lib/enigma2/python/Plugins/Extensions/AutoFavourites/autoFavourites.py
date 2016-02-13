@@ -97,7 +97,7 @@ def genfav():
                 serviceid = line
                 continue
 
-            if regexchannel.match(line):
+            if regexchannel.seach(line):
                 servicesplit = serviceid.split(':')
                 channel = {
                     'channelname':   line,
