@@ -106,14 +106,14 @@ def genfav():
                 if regexref.match(line.strip()):
                     serviceref = line.strip()
                     continue
-                if regexfav.search(line.strip()):
-                    channel = extractchannel(line.strip(), serviceref)
-                    if favname.lower() == 'epgrefresh':
-                        if isepgchannel(channel, tpcodes):
-                            tpcodes.append(channel['tpcode'])
-                            channels.append(channel)
-                    else:
+                if not regexfav.search(line.strip()):
+                    continue
+                if favname.lower() == 'epgrefresh':
+                    if isepgchannel(channel, tpcodes):
+                        tpcodes.append(channel['tpcode'])
                         channels.append(channel)
+                else:
+                    channels.append(channel)
 
         filelamedb.close()
 
