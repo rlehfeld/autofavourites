@@ -43,9 +43,9 @@ def formatchannel(channel):
 
     return channel
 
-def extractrule(rule)
+def extractrule(rule):
     rule = rule.rstrip()
-    return rule.split(":")    
+    return rule.split(":")
 
 def genfavindex():
     favindexfile = open(outdir + '/bouquets.tv', 'w')
@@ -84,8 +84,7 @@ def genfav():
         favfile.write("#NAME " + favname + "\n")
 
         channels, tpcodes = [], []
-        serviceid = None
-        servicesarea = False
+        serviceid, servicesarea = None, False
         regexchannel = re.compile(channellist, re.IGNORECASE)
         regexid = re.compile('^.{4}:.{8}:.{4}')
         filelamedb = open(lamedb)
