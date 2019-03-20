@@ -32,7 +32,17 @@ def mkfavfilename(s):
     s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
     return 'userbouquet.' + s + '.tv'
 
-def formatchannel(channel):
+def extractchannel(serviceid):
+    servicesplit = serviceid.split(':')
+    channel = {
+        'channelname':   line,
+        'channelcode':   servicesplit[0],
+        'tpcode':        servicesplit[1],
+        'code2':         servicesplit[2],
+        'code3':         servicesplit[3],
+        'channeltype':   servicesplit[4]
+    }
+
     channel['channeltype'] = re.sub('^0+','',channel['channeltype']).upper()
     channel['channelcode'] = re.sub('^0+','',channel['channelcode']).upper()
     channel['code2'] = re.sub('^0+','',channel['code2']).upper()
@@ -104,16 +114,7 @@ def genfav():
                     serviceid = line
                     continue
                 if regexchannel.search(line):
-                    servicesplit = serviceid.split(':')
-                    channel = {
-                        'channelname':   line,
-                        'channelcode':   servicesplit[0],
-                        'tpcode':        servicesplit[1],
-                        'code2':         servicesplit[2],
-                        'code3':         servicesplit[3],
-                        'channeltype':   servicesplit[4]
-                    }
-                    channel = formatchannel(channel)
+                    channel = extractchannel(serviceid)
                     if (favname.lower() == 'epgrefresh'):
                         if isepgchannel(channel, tpcodes):
                             tpcodes.append(channel['tpcode'])
