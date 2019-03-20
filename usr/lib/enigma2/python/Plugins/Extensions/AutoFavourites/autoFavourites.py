@@ -98,6 +98,7 @@ def genfav():
 
             if (servicesarea and line == 'end'):
                 servicesarea = False
+                continue
 
             if (not servicesarea):
                 continue
