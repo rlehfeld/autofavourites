@@ -10,7 +10,7 @@ import urllib
 #---------------------------------------------
 lamedb = '/etc/enigma2/lamedb'
 outdir = '/etc/enigma2'
-rules = '/etc/autoFavourites.cfg'
+rules  = '/etc/autoFavourites.cfg'
 #---------------------------------------------
 
 def removeoldfiles():
@@ -61,6 +61,16 @@ def genfavindex():
     radioindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.radio" ORDER BY bouquet\n')
     radioindexfile.close()
 
+def writechannels(channels, favfile):
+    channels = sorted(channels, key=lambda channel: channel['channelname'].lower())
+    for channel in channels:
+        favfile.write("#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:" % channel + "\n")
+
+def isepgchannel(channel, tpcodes):
+    istvchannel = channel['channeltype'] in ('1', '19')
+    isuniquetp  = (not (channel['tpcode'] in tpcodes))
+    return (istvchannel and isuniquetp)
+
 def genfav():
     filerules = open(rules)
     for rule in filerules:
@@ -70,13 +80,13 @@ def genfav():
         favfile = open(outdir + '/' + favfilename, 'w')
         favfile.write("#NAME " + favname + "\n")
 
-        channels = []
-        tpcodes = []
+        channels, tpcodes = [], []
         serviceid = None
         servicesarea = False
         regexchannel = re.compile(channellist, re.IGNORECASE)
         regexid = re.compile('^.{4}:.{8}:.{4}')
         filelamedb = open(lamedb)
+
         for line in filelamedb:
             line = line.rstrip()
 
@@ -111,9 +121,7 @@ def genfav():
                 channel = formatchannel(channel)
 
                 if (favname.lower() == 'epgrefresh'):
-                    istvchannel = channel['channeltype'] in ('1', '19')
-                    isuniquetp = (not (channel['tpcode'] in tpcodes))
-                    if (istvchannel and isuniquetp):
+                    if isepgchannel(channel, tpcodes):
                         tpcodes.append(channel['tpcode'])
                         channels.append(channel)
                 else:
@@ -121,10 +129,7 @@ def genfav():
 
         filelamedb.close()
 
-        channels = sorted(channels, key=lambda channel: channel['channelname'].lower())
-        for channel in channels:
-            favfile.write("#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:" % channel + "\n")
-
+        writechannels(channels, favfile)
         favfile.close()
 
 def gendefaultfav():

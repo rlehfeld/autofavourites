@@ -2,7 +2,7 @@
 #
 #    Plugin for Enigma2
 #    version:
-VERSION = "0.2.4"
+VERSION = "0.2.5"
 #    This program is free software; you can redistribute it and/or
 #    modify it under the terms of the GNU General Public License
 #    as published by the Free Software Foundation; either version 2
@@ -19,7 +19,6 @@ from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
 from Screens.MessageBox import MessageBox
-#from enigma import quitMainloop
 from Screens.Standby import TryQuitMainloop
 
 APP_NAME = "AutoFavourites"
@@ -39,8 +38,9 @@ class AutoFavourites:
 		]
 		self.sat_options = [
 			("OE-Alliance", "source1"),
-			("South America 1", "source2"),
-			("South America 2", "source3")
+			("OpenPli", "source2"),
+			("Portal EDS", "source3"),
+			("Portal BSD", "source4")
 		]
 		self.openMenu()
 
@@ -73,6 +73,8 @@ class AutoFavourites:
 			self.updateSat('2')
 		elif choice is "source3":
 			self.updateSat('3')
+		elif choice is "source4":
+			self.updateSat('4')
 
 	def fastScan(self):
 		from Screens.ScanSetup import *
