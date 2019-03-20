@@ -43,13 +43,17 @@ def formatchannel(channel):
 
     return channel
 
+def extractrule(rule)
+    rule = rule.rstrip()
+    return rule.split(":")    
+
 def genfavindex():
     favindexfile = open(outdir + '/bouquets.tv', 'w')
     favindexfile.write('#NAME User - bouquets (TV)\n')
 
     filerules = open(rules)
     for rule in filerules:
-        favname, channellist = rule.split("==")
+        favname, channellist = extractrule(rule)
         favfilename = mkfavfilename(favname)
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % favfilename)
 
@@ -74,8 +78,7 @@ def isepgchannel(channel, tpcodes):
 def genfav():
     filerules = open(rules)
     for rule in filerules:
-        rule = rule.rstrip()
-        favname, channellist = rule.split("==")
+        favname, channellist = extractrule(rule)
         favfilename = mkfavfilename(favname)
         favfile = open(outdir + '/' + favfilename, 'w')
         favfile.write("#NAME " + favname + "\n")
