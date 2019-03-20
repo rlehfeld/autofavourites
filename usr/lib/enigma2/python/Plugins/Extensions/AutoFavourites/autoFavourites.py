@@ -32,15 +32,15 @@ def genfavfilename(name):
     name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
     return 'userbouquet.%s.tv' % name
 
-def extractchannel(serviceid):
-    servicesplit = serviceid.split(':')
+def extractchannel(line, serviceref):
+    servicesplited = serviceref.split(':')
     channel = {
         'channelname':   line,
-        'channelcode':   servicesplit[0],
-        'tpcode':        servicesplit[1],
-        'code2':         servicesplit[2],
-        'code3':         servicesplit[3],
-        'channeltype':   servicesplit[4]
+        'channelcode':   servicesplited[0],
+        'tpcode':        servicesplited[1],
+        'code2':         servicesplited[2],
+        'code3':         servicesplited[3],
+        'channeltype':   servicesplited[4]
     }
 
     channel['channeltype'] = re.sub('^0+','',channel['channeltype']).upper()
@@ -62,7 +62,7 @@ def genfavindex():
 
     filerules = open(rules)
     for rule in filerules:
-        favname, channellist = extractrule(rule)
+        favname, favregexp = extractrule(rule)
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
 
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
@@ -86,31 +86,30 @@ def isepgchannel(channel, tpcodes):
 def genfav():
     filerules = open(rules)
     for rule in filerules:
-        favname, channellist = extractrule(rule)
+        favname, favregexp = extractrule(rule)
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
+        regexref = re.compile('^.{4}:.{8}:.{4}:.{4}:.{1}:.{1}:.{1}$')
+        regexfav = re.compile(favregexp, re.IGNORECASE)
         channels, tpcodes = [], []
-        serviceid, servicesreading = None, False
+        serviceref, servicesreading = None, False
         filelamedb = open(lamedb)
         for line in filelamedb:
-            line = line.strip()
-            if line == 'services':
+            if line.strip() == 'services':
                 servicesreading = True
                 continue
-            if servicesreading and line == 'end':
+            if servicesreading and line.strip() == 'end':
                 servicesreading = False
                 continue
             if servicesreading:
-                regexid      = re.compile('^.{4}:.{8}:.{4}:.{4}:.{1}:.{1}:.{1}$')
-                regexchannel = re.compile(channellist, re.IGNORECASE)
-                if line.startswith('p:'):
+                if line.strip().startswith('p:'):
                     continue
-                if regexid.match(line):
-                    serviceid = line
+                if regexref.match(line.strip()):
+                    serviceref = line.strip()
                     continue
-                if regexchannel.search(line):
-                    channel = extractchannel(serviceid)
+                if regexfav.search(line.strip()):
+                    channel = extractchannel(line.strip(), serviceref)
                     if favname.lower() == 'epgrefresh':
                         if isepgchannel(channel, tpcodes):
                             tpcodes.append(channel['tpcode'])
