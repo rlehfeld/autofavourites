@@ -63,8 +63,7 @@ def genfavindex():
     filerules = open(rules)
     for rule in filerules:
         favname, channellist = extractrule(rule)
-        favfilename = mkfavfilename(favname)
-        favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % favfilename)
+        favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
 
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
     favindexfile.close()
@@ -88,8 +87,7 @@ def genfav():
     filerules = open(rules)
     for rule in filerules:
         favname, channellist = extractrule(rule)
-        favfilename = mkfavfilename(favname)
-        favfile = open(outdir + '/' + favfilename, 'w')
+        favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
         channels, tpcodes = [], []
@@ -104,7 +102,7 @@ def genfav():
                 servicesreading = False
                 continue
             if servicesreading:
-                regexid      = re.compile('^.{4}:.{8}:.{4}')
+                regexid      = re.compile('^.{4}:.{8}:.{4}:.{4}:.{1}:.{1}:.{1}$')
                 regexchannel = re.compile(channellist, re.IGNORECASE)
                 if line.startswith('p:'):
                     continue
