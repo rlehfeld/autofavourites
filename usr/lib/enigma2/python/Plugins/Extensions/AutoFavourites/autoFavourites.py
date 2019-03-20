@@ -94,13 +94,9 @@ def genfav():
 
         channels, tpcodes = [], []
         serviceid, servicesreading = None, False
-        regexchannel = re.compile(channellist, re.IGNORECASE)
-        regexid = re.compile('^.{4}:.{8}:.{4}')
         filelamedb = open(lamedb)
-
         for line in filelamedb:
             line = line.strip()
-
             if line == 'services':
                 servicesreading = True
                 continue
@@ -108,6 +104,8 @@ def genfav():
                 servicesreading = False
                 continue
             if servicesreading:
+                regexid      = re.compile('^.{4}:.{8}:.{4}')
+                regexchannel = re.compile(channellist, re.IGNORECASE)
                 if line.startswith('p:'):
                     continue
                 if regexid.match(line):
