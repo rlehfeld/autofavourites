@@ -7,6 +7,8 @@ import re
 import unicodedata
 import urllib
 
+from enigma import eDVBDB
+
 #---------------------------------------------
 lamedb = '/etc/enigma2/lamedb'
 outdir = '/etc/enigma2'
@@ -22,12 +24,10 @@ def removeoldfiles():
     for bouquetindex in bouquetindexes:
         os.remove(bouquetindex)
 
-def reload():
-    f = urllib.urlopen('http://127.0.0.1/web/servicelistreload?mode=2')
-    s = f.read()
-    f.close()
+def reloadbouquets():
+    eDVBDB.reloadBouquets()
 
-def mkfavfilename(name):
+def genfavfilename(name):
     name = unicode(name.replace(' ', '').lower(), 'UTF-8')
     name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
     return 'userbouquet.%s.tv' % name
@@ -148,6 +148,6 @@ def main():
     log('Generating favourites...\n')
     genfav()
     log('Reloading...\n')
-    reload()
+    reloadbouquets()
 
 main()
