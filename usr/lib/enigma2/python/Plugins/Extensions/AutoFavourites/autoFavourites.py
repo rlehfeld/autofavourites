@@ -10,7 +10,7 @@ import urllib
 #---------------------------------------------
 lamedb = '/etc/enigma2/lamedb'
 outdir = '/etc/enigma2'
-rules  = '/etc/autoFavourites.cfg'
+rules  = '/etc/bouquetRules.cfg'
 #---------------------------------------------
 
 def removeoldfiles():

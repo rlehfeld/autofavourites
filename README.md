@@ -8,7 +8,7 @@ Is possible too update satellites.xml from OE-Alliance or other sources.
 opkg install enigma2-plugin-extensions-autofavourites.ipk
 
 ## Usage
-Create a file /etc/autoFavourites.cfg with content as example:
+Create a file /etc/bouquetRules.cfg with content as example:
 ```
 Documentaries==Animal Planet|Discovery Channel|H2|National Geographic|The History Channel|Nat Geo
 Movies and Series==AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount|Prime Box|Sony|Space|Studio Universal|Syfy|TBS|TCM|^Telecine|TNT|Universal Channel|^Warner
