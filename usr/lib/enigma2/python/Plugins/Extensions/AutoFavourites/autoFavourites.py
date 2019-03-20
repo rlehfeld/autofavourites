@@ -32,10 +32,10 @@ def genfavfilename(name):
     name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
     return 'userbouquet.%s.tv' % name
 
-def extractchannel(line, serviceref):
+def extractchannel(name, serviceref):
     servicesplited = serviceref.split(':')
     channel = {
-        'channelname':   line,
+        'channelname':   name,
         'channelcode':   servicesplited[0],
         'tpcode':        servicesplited[1],
         'code2':         servicesplited[2],
@@ -103,8 +103,6 @@ def genfav():
                 servicesreading = False
                 continue
             if servicesreading:
-                if line.strip().startswith('p:'):
-                    continue
                 if regexref.match(line.strip()):
                     serviceref = line.strip()
                     continue
