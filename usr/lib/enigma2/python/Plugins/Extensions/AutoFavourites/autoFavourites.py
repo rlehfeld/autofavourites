@@ -23,7 +23,7 @@ def removeoldfiles():
         os.remove(bouquetindex)
 
 def reload():
-    f = urllib.urlopen("http://127.0.0.1/web/servicelistreload?mode=2")
+    f = urllib.urlopen('http://127.0.0.1/web/servicelistreload?mode=2')
     s = f.read()
     f.close()
 
@@ -33,10 +33,10 @@ def mkfavfilename(s):
     return 'userbouquet.' + s + '.tv'
 
 def formatchannel(channel):
-    channel['channeltype'] = re.sub("^0+","",channel['channeltype']).upper()
-    channel['channelcode'] = re.sub("^0+","",channel['channelcode']).upper()
-    channel['code2'] = re.sub("^0+","",channel['code2']).upper()
-    channel['tpcode'] = re.sub("^0+","",channel['tpcode']).upper()
+    channel['channeltype'] = re.sub('^0+','',channel['channeltype']).upper()
+    channel['channelcode'] = re.sub('^0+','',channel['channelcode']).upper()
+    channel['code2'] = re.sub('^0+','',channel['code2']).upper()
+    channel['tpcode'] = re.sub('^0+','',channel['tpcode']).upper()
 
     if (channel['channeltype'] == '25'):
         channel['channeltype'] = '19'
@@ -44,8 +44,7 @@ def formatchannel(channel):
     return channel
 
 def extractrule(rule):
-    rule = rule.rstrip()
-    return rule.split(":")
+    return rule.strip().split(':')
 
 def genfavindex():
     favindexfile = open(outdir + '/bouquets.tv', 'w')
@@ -68,7 +67,7 @@ def genfavindex():
 def writechannels(channels, favfile):
     channels = sorted(channels, key=lambda channel: channel['channelname'].lower())
     for channel in channels:
-        favfile.write("#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:" % channel + "\n")
+        favfile.write('#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:\n' % channel)
 
 def isepgchannel(channel, tpcodes):
     istvchannel = channel['channeltype'] in ('1', '19')
@@ -81,54 +80,46 @@ def genfav():
         favname, channellist = extractrule(rule)
         favfilename = mkfavfilename(favname)
         favfile = open(outdir + '/' + favfilename, 'w')
-        favfile.write("#NAME " + favname + "\n")
+        favfile.write('#NAME %s\n' % favname)
 
         channels, tpcodes = [], []
-        serviceid, servicesarea = None, False
+        serviceid, servicesreading = None, False
         regexchannel = re.compile(channellist, re.IGNORECASE)
         regexid = re.compile('^.{4}:.{8}:.{4}')
         filelamedb = open(lamedb)
 
         for line in filelamedb:
-            line = line.rstrip()
+            line = line.strip()
 
-            if (line == 'services'):
-                servicesarea = True
+            if line == 'services':
+                servicesreading = True
                 continue
-
-            if (servicesarea and line == 'end'):
-                servicesarea = False
+            if servicesreading and line == 'end':
+                servicesreading = False
                 continue
-
-            if (not servicesarea):
-                continue
-
-            if line.startswith('p:'):
-                continue
-
-            if regexid.match(line):
-                serviceid = line
-                continue
-
-            if regexchannel.search(line):
-                servicesplit = serviceid.split(':')
-                channel = {
-                    'channelname':   line,
-                    'channelcode':   servicesplit[0],
-                    'tpcode':        servicesplit[1],
-                    'code2':         servicesplit[2],
-                    'code3':         servicesplit[3],
-                    'channeltype':   servicesplit[4]
-                }
-
-                channel = formatchannel(channel)
-
-                if (favname.lower() == 'epgrefresh'):
-                    if isepgchannel(channel, tpcodes):
-                        tpcodes.append(channel['tpcode'])
+            if servicesreading:
+                if line.startswith('p:'):
+                    continue
+                if regexid.match(line):
+                    serviceid = line
+                    continue
+                if regexchannel.search(line):
+                    servicesplit = serviceid.split(':')
+                    channel = {
+                        'channelname':   line,
+                        'channelcode':   servicesplit[0],
+                        'tpcode':        servicesplit[1],
+                        'code2':         servicesplit[2],
+                        'code3':         servicesplit[3],
+                        'channeltype':   servicesplit[4]
+                    }
+                    channel = formatchannel(channel)
+                    if (favname.lower() == 'epgrefresh'):
+                        if isepgchannel(channel, tpcodes):
+                            tpcodes.append(channel['tpcode'])
+                            channels.append(channel)
+                    else:
                         channels.append(channel)
-                else:
-                    channels.append(channel)
 
         filelamedb.close()
 
@@ -137,11 +128,11 @@ def genfav():
 
 def gendefaultfav():
     favtvallfile = open(outdir + '/userbouquet.favourites.tv', 'w')
-    favtvallfile.write("#NAME Favourites (TV)\n")
+    favtvallfile.write('#NAME Favourites (TV)\n')
     favtvallfile.close()
 
     favradioallfile = open(outdir + '/userbouquet.favourites.radio', 'w')
-    favradioallfile.write("#NAME Favourites (Radio)\n")
+    favradioallfile.write('#NAME Favourites (Radio)\n')
     favradioallfile.close()
 
 def log(msg):
