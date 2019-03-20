@@ -27,10 +27,10 @@ def reload():
     s = f.read()
     f.close()
 
-def mkfavfilename(s):
-    s = unicode(s.replace(' ', '').lower(), 'UTF-8')
-    s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
-    return 'userbouquet.' + s + '.tv'
+def mkfavfilename(name):
+    name = unicode(name.replace(' ', '').lower(), 'UTF-8')
+    name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
+    return 'userbouquet.%s.tv' % name
 
 def extractchannel(serviceid):
     servicesplit = serviceid.split(':')
@@ -48,7 +48,7 @@ def extractchannel(serviceid):
     channel['code2'] = re.sub('^0+','',channel['code2']).upper()
     channel['tpcode'] = re.sub('^0+','',channel['tpcode']).upper()
 
-    if (channel['channeltype'] == '25'):
+    if channel['channeltype'] == '25':
         channel['channeltype'] = '19'
 
     return channel
@@ -115,7 +115,7 @@ def genfav():
                     continue
                 if regexchannel.search(line):
                     channel = extractchannel(serviceid)
-                    if (favname.lower() == 'epgrefresh'):
+                    if favname.lower() == 'epgrefresh':
                         if isepgchannel(channel, tpcodes):
                             tpcodes.append(channel['tpcode'])
                             channels.append(channel)
