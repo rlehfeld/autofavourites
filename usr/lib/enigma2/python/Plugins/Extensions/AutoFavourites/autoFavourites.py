@@ -54,16 +54,15 @@ def genfavindex():
 
 def extractchannel(name, serviceref):
     ref = serviceref.split(':')
-    if ref[4] == '25': ref[4] = '19'
-    return { 'NAME': name, 'SID': ref[0], 'NS': ref[1], 'TSID': ref[2], 'ONID': ref[3], 'STYPE': ref[4] }
+    return { 'NAME': name, 'SID': ref[0], 'NS': ref[1], 'TSID': ref[2], 'ONID': ref[3], 'STYPE': int(ref[4]) }
 
 def writechannels(channels, favfile):
     channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
     for channel in channels:
-        favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
+        favfile.write('#SERVICE 1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
 
 def isepgchannel(channel, namespaces):
-    istvchannel = channel['STYPE'] in ['1', '19']
+    istvchannel = channel['STYPE'] in [1, 19]
     isuniquens  = (not (channel['NS'] in namespaces))
     return (istvchannel and isuniquens)
 
