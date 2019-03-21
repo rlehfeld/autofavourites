@@ -45,6 +45,7 @@ Noticias:^CNN|CNT|GloboNews|Record News|Band News
 Publico:Canal Claro|Canal Rural|Futura|NBR|Polishop|Rede Brasil|RIT|Terra Viva|TV Brasil|TV Câmara|TV Escola|TV Justiça|TV Senado
 Variedades:Globosat|A&E|Arte 1|^BIS|Comedy Central|Curta!|^Disc. Home|(?=Discovery)(?!Discovery Channel|Discovery Kids)|E!|Fox Life|Glitz|GNT|Ideal TV|Lifetime|MTV|Multishow|Music Box Brazil|OFF|TLC|truTV|^Viva|WooHoo|^VH1|BBB
 EPGRefresh:^(?!TVEXEC|TVTEC|Teste)\w*
+BlackList:SEX|PLAYBOY
 ```
 
 # Screenshots

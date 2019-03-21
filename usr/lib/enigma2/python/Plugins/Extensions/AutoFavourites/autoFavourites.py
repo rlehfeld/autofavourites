@@ -12,9 +12,8 @@ import unicodedata
 #   D       D     X     X   X    X    X  X          X           X
 
 #---------------------------------------------
-lamedb = '/etc/enigma2/lamedb'
-outdir = '/etc/enigma2'
-rules  = '/etc/bouquetRules.cfg'
+outdir    = '/etc/enigma2'
+rules     = '/etc/bouquetRules.cfg'
 #---------------------------------------------
 
 def removeoldfiles():
@@ -25,6 +24,10 @@ def removeoldfiles():
     bouquetindexes = glob.glob(outdir + '/bouquets.*')
     for bouquetindex in bouquetindexes:
         os.remove(bouquetindex)
+
+    blacklists = glob.glob(outdir + '/blacklist')
+    for blacklist in blacklists:
+        os.remove(blacklist)
 
 def genfavfilename(name):
     name = unicode(name.replace(' ', '').lower(), 'UTF-8')
@@ -65,14 +68,13 @@ def isepgchannel(channel, namespaces):
     isuniquens  = (not (channel['NS'] in namespaces))
     return (istvchannel and isuniquens)
 
-def loadchannels(lamedb, favname, favregexp):
-    channels, namespaces = [], []
+def loadchannels(favname, favregexp):
+    channels, blacklist, namespaces = [], [], []
     serviceref, servicesreading = None, False
-
     regexref = re.compile('^.{4}:.{8}:.{4}:.{4}')
     regexfav = re.compile(favregexp, re.IGNORECASE)
 
-    filelamedb = open(lamedb)
+    filelamedb = open(outdir + '/lamedb')
     for line in filelamedb:
         if line.strip() == 'services':
             servicesreading = True
@@ -88,6 +90,8 @@ def loadchannels(lamedb, favname, favregexp):
                 continue
             if regexfav.match(line.strip()):
                 channel = extractchannel(line.strip(), serviceref)
+                if favname.lower() == 'blacklist':
+                    blacklist.append(channel)
                 if favname.lower() == 'epgrefresh':
                     if isepgchannel(channel, namespaces):
                         namespaces.append(channel['NS'])
@@ -95,7 +99,19 @@ def loadchannels(lamedb, favname, favregexp):
                 else:
                     channels.append(channel)
     filelamedb.close()
-    return channels
+    return channels, blacklist
+
+def genblacklist():
+    filerules = open(rules)
+    for rline in filerules:
+        favname, favregexp = extractrule(rline)
+        blacklistfile = open(outdir + '/blacklist', 'w')
+
+        channels, blacklist = loadchannels(favname, favregexp)
+        writechannels(blacklist, blacklistfile)
+
+        blacklistfile.close()
+    filerules.close()
 
 def genfav():
     filerules = open(rules)
@@ -105,7 +121,7 @@ def genfav():
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
-        channels = loadchannels(lamedb, favname, favregexp)
+        channels, blacklist = loadchannels(favname, favregexp)
         writechannels(channels, favfile)
 
         favfile.close()
@@ -129,5 +145,7 @@ def main():
     gendefaultfav()
     print('Generating favourites...')
     genfav()
+    print('Generating blacklist...')
+    genblacklist()
 
 main()
