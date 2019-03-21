@@ -15,6 +15,8 @@ VERSION = '0.2.5'
 #
 #################################################################################
 
+from enigma import eDVBDB
+
 from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
@@ -46,6 +48,14 @@ class AutoFavourites:
 
 	def openMenu(self):
 		self.session.openWithCallback(self.menuDone, ChoiceBox, title = self.global_title, list = self.menu_options)
+
+	def genFavCallback(self):
+		eDVBDB.getInstance().reloadBouquets()
+		self.openMenu()
+
+	def updateSatCallback(self):
+		self.session.open(TryQuitMainloop, 3)
+		return False
 
 	def menuDone(self, option):
 		if option is None:
@@ -81,14 +91,10 @@ class AutoFavourites:
 		self.session.openWithCallback(self.openMenu, ScanSimple)
 
 	def genFav(self):
-		self.session.openWithCallback(self.openMenu, Console, self.global_title, [AUTO_FAVOURITES])
+		self.session.openWithCallback(self.genFavCallback, Console, title = self.global_title, cmdlist = [AUTO_FAVOURITES])
 
 	def updateSat(self, source):
-		self.session.openWithCallback(self.restartGUI, Console, self.global_title, [UPDATE_SATELLITE + ' ' + source])
-
-	def restartGUI(self):
-		self.session.open(TryQuitMainloop, 3)
-		return False
+		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = [UPDATE_SATELLITE + ' ' + source])
 
 ###############################################################################
 def main(session, **kwargs):

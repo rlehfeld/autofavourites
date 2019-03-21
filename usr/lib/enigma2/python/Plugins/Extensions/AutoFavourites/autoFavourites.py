@@ -5,9 +5,7 @@ import sys
 import glob
 import re
 import unicodedata
-import urllib
 
-from enigma import eDVBDB
 #	SID:NS:TSID:ONID:STYPE:UNUSED(channelnumber in enigma1)
 #	X   X  X    X    D     D
 
@@ -28,9 +26,6 @@ def removeoldfiles():
     bouquetindexes = glob.glob(outdir + '/bouquets.*')
     for bouquetindex in bouquetindexes:
         os.remove(bouquetindex)
-
-def reloadbouquets():
-    eDVBDB.reloadBouquets()
 
 def genfavfilename(name):
     name = unicode(name.replace(' ', '').lower(), 'UTF-8')
@@ -62,7 +57,7 @@ def extractchannel(name, serviceref):
     return { 'NAME': name, 'SID': serv[0], 'NS': serv[1], 'TSID': serv[2], 'ONID': serv[3], 'STYPE': serv[4] }
 
 def writechannels(channels, favfile):
-    channels = sorted(channels, key=lambda channel: channel['channelname'].lower())
+    channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
     for channel in channels:
         favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0:\n' % channel)
 
@@ -94,14 +89,14 @@ def genfav():
                 if regexref.match(line.strip()):
                     serviceref = line.strip()
                     continue
-                if not regexfav.search(line.strip()):
-                    continue
-                if favname.lower() == 'epgrefresh':
-                    if isepgchannel(channel, namespaces):
-                        namespaces.append(channel['NS'])
+                if regexfav.search(line.strip()):
+                    channel = extractchannel(line.strip(), serviceref)
+                    if favname.lower() == 'epgrefresh':
+                        if isepgchannel(channel, namespaces):
+                            namespaces.append(channel['NS'])
+                            channels.append(channel)
+                    else:
                         channels.append(channel)
-                else:
-                    channels.append(channel)
 
         filelamedb.close()
 
@@ -130,7 +125,5 @@ def main():
     gendefaultfav()
     log('Generating favourites...\n')
     genfav()
-    log('Reloading...\n')
-    reloadbouquets()
 
 main()
