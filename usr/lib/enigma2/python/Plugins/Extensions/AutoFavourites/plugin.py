@@ -60,8 +60,7 @@ class AutoFavourites:
 		if option is None:
 			self.openMenu()
 		else:
-			description, choice = option
-			self.updateSat(choice)
+			self.updateSat(option[1])
 
 	def menuDone(self, option):
 		if option is None:

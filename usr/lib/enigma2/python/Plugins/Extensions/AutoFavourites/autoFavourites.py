@@ -53,10 +53,9 @@ def genfavindex():
     radioindexfile.close()
 
 def extractchannel(name, serviceref):
-    serv = serviceref.split(':')
-    channel = { 'NAME': name, 'SID': serv[0], 'NS': serv[1], 'TSID': serv[2], 'ONID': serv[3], 'STYPE': serv[4] }
-    channel['STYPE'] = '19' if channel['STYPE'] == '25' else channel['STYPE']
-    return channel
+    ref = serviceref.split(':')
+    if ref[4] == '25': ref[4] = '19'
+    return { 'NAME': name, 'SID': ref[0], 'NS': ref[1], 'TSID': ref[2], 'ONID': ref[3], 'STYPE': ref[4] }
 
 def writechannels(channels, favfile):
     channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
@@ -64,7 +63,7 @@ def writechannels(channels, favfile):
         favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
 
 def isepgchannel(channel, namespaces):
-    istvchannel = channel['STYPE'] in ('1', '19') # SD/HD
+    istvchannel = channel['STYPE'] in ['1', '19']
     isuniquens  = (not (channel['NS'] in namespaces))
     return (istvchannel and isuniquens)
 
