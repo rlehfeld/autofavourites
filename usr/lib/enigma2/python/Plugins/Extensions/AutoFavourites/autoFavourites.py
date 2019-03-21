@@ -66,44 +66,51 @@ def isepgchannel(channel, namespaces):
     isuniquens  = (not (channel['NS'] in namespaces))
     return (istvchannel and isuniquens)
 
+def loadchannels(lamedb, favname, favregexp):
+    channels, namespaces = [], []
+    serviceref, servicesreading = None, False
+
+    regexref = re.compile('^.{4}:.{8}:.{4}:.{4}')
+    regexfav = re.compile(favregexp, re.IGNORECASE)
+
+    filelamedb = open(lamedb)
+    for line in filelamedb:
+        if line.strip() == 'services':
+            servicesreading = True
+            continue
+        if servicesreading:
+            if line.strip() == 'end':
+                servicesreading = False
+                continue
+            if line.strip().startswith('p:'):
+                continue
+            if regexref.match(line.strip()):
+                serviceref = line.strip()
+                continue
+            if regexfav.match(line.strip()):
+                channel = extractchannel(line.strip(), serviceref)
+                if favname.lower() == 'epgrefresh':
+                    if isepgchannel(channel, namespaces):
+                        namespaces.append(channel['NS'])
+                        channels.append(channel)
+                else:
+                    channels.append(channel)
+    filelamedb.close()
+    return channels
+
 def genfav():
     filerules = open(rules)
     for rline in filerules:
         favname, favregexp = extractrule(rline)
+
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
-        regexref = re.compile('^.{4}:.{8}:.{4}:.{4}')
-        regexfav = re.compile(favregexp, re.IGNORECASE)
-        channels, namespaces = [], []
-        serviceref, servicesreading = None, False
-        filelamedb = open(lamedb)
-        for line in filelamedb:
-            if line.strip() == 'services':
-                servicesreading = True
-                continue
-            if servicesreading:
-                if line.strip() == 'end':
-                    servicesreading = False
-                    continue
-                if regexref.match(line.strip()):
-                    serviceref = line.strip()
-                    continue
-                if line.strip().startswith('p:'):
-                    continue
-                if regexfav.match(line.strip()):
-                    channel = extractchannel(line.strip(), serviceref)
-                    if favname.lower() == 'epgrefresh':
-                        if isepgchannel(channel, namespaces):
-                            namespaces.append(channel['NS'])
-                            channels.append(channel)
-                    else:
-                        channels.append(channel)
-
-        filelamedb.close()
-
+        channels = loadchannels(lamedb, favname, favregexp)
         writechannels(channels, favfile)
+
         favfile.close()
+    filerules.close()
 
 def gendefaultfav():
     favtvallfile = open(outdir + '/userbouquet.favourites.tv', 'w')
