@@ -25,8 +25,6 @@ from Screens.Standby import TryQuitMainloop
 from Screens.ScanSetup import *
 
 APP_NAME = 'AutoFavourites'
-AUTO_FAVOURITES = 'python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/autoFavourites.py'
-UPDATE_SATELLITE = 'python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/updateSatellites.py'
 
 class AutoFavourites:
 
@@ -40,17 +38,17 @@ class AutoFavourites:
 			(_('Exit'), 'exit')
 		]
 		self.sat_options = [
-			('OE-Alliance', 'source1'),
-			('OpenPli', 'source2'),
-			('Portal EDS', 'source3'),
-			('Portal BSD', 'source4')
+			('OE-Alliance', 'alliance'),
+			('OpenPli', 'openpli'),
+			('Portal EDS', 'portaleds'),
+			('Portal BSD', 'portalbsd')
 		]
 		self.openMenu()
 
 	def openMenu(self):
 		self.session.openWithCallback(self.menuDone, ChoiceBox, title = self.global_title, list = self.menu_options)
 
-	def genFavCallback(self):
+	def generateCallback(self):
 		eDVBDB.getInstance().reloadBouquets()
 		self.openMenu()
 
@@ -58,43 +56,31 @@ class AutoFavourites:
 		self.session.open(TryQuitMainloop, 3)
 		return False
 
+	def updateCallback(self, option):
+		if option is None:
+			self.openMenu()
+		else:
+			description, choice = option
+			self.updateSat(choice)
+
 	def menuDone(self, option):
 		if option is None:
-			return
+			return False
 
 		(description, choice) = option
 		if choice is 'scan':
-			self.fastScan()
+			self.session.openWithCallback(self.openMenu, ScanSimple)
 		elif choice is 'generate':
-			self.genFav()
+			cmd = ['python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/autoFavourites.py']
+			self.session.openWithCallback(self.generateCallback, Console, title = self.global_title, cmdlist = cmd)
 		elif choice is 'update':
-			self.session.openWithCallback(self.menuDoneSat, ChoiceBox, title = self.global_title, list = self.sat_options)
+			self.session.openWithCallback(self.updateCallback, ChoiceBox, title = self.global_title, list = self.sat_options)
 		elif choice is 'exit':
 			self.session.close
 
-	def menuDoneSat(self, option):
-		if option is None:
-			self.openMenu()
-			return
-
-		(description, choice) = option
-		if choice is 'source1':
-			self.updateSat('1')
-		elif choice is 'source2':
-			self.updateSat('2')
-		elif choice is 'source3':
-			self.updateSat('3')
-		elif choice is 'source4':
-			self.updateSat('4')
-
-	def fastScan(self):
-		self.session.openWithCallback(self.openMenu, ScanSimple)
-
-	def genFav(self):
-		self.session.openWithCallback(self.genFavCallback, Console, title = self.global_title, cmdlist = [AUTO_FAVOURITES])
-
 	def updateSat(self, source):
-		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = [UPDATE_SATELLITE + ' ' + source])
+		cmd = ['python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/updateSatellites.py' + ' ' + source]
+		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = cmd)
 
 ###############################################################################
 def main(session, **kwargs):
