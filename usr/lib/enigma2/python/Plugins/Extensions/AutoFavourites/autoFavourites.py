@@ -8,6 +8,11 @@ import unicodedata
 import urllib
 
 from enigma import eDVBDB
+#	SID:NS:TSID:ONID:STYPE:UNUSED(channelnumber in enigma1)
+#	X   X  X    X    D     D
+
+#	REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
+#   D       D     X     X   X    X    X  X          X           X
 
 #---------------------------------------------
 lamedb = '/etc/enigma2/lamedb'
@@ -32,27 +37,6 @@ def genfavfilename(name):
     name = ''.join(c for c in unicodedata.normalize('NFD', name) if unicodedata.category(c) != 'Mn')
     return 'userbouquet.%s.tv' % name
 
-def extractchannel(name, serviceref):
-    servicesplited = serviceref.split(':')
-    channel = {
-        'channelname':   name,
-        'channelcode':   servicesplited[0],
-        'tpcode':        servicesplited[1],
-        'code2':         servicesplited[2],
-        'code3':         servicesplited[3],
-        'channeltype':   servicesplited[4]
-    }
-
-    channel['channeltype'] = re.sub('^0+','',channel['channeltype']).upper()
-    channel['channelcode'] = re.sub('^0+','',channel['channelcode']).upper()
-    channel['code2'] = re.sub('^0+','',channel['code2']).upper()
-    channel['tpcode'] = re.sub('^0+','',channel['tpcode']).upper()
-
-    if channel['channeltype'] == '25':
-        channel['channeltype'] = '19'
-
-    return channel
-
 def extractrule(rule):
     return rule.strip().split(':')
 
@@ -73,15 +57,19 @@ def genfavindex():
     radioindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.radio" ORDER BY bouquet\n')
     radioindexfile.close()
 
+def extractchannel(name, serviceref):
+    serv = serviceref.split(':')
+    return { 'NAME': name, 'SID': serv[0], 'NS': serv[1], 'TSID': serv[2], 'ONID': serv[3], 'STYPE': serv[4] }
+
 def writechannels(channels, favfile):
     channels = sorted(channels, key=lambda channel: channel['channelname'].lower())
     for channel in channels:
-        favfile.write('#SERVICE 1:0:%(channeltype)s:%(channelcode)s:%(code2)s:1:%(tpcode)s:0:0:0:\n' % channel)
+        favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0:\n' % channel)
 
-def isepgchannel(channel, tpcodes):
-    istvchannel = channel['channeltype'] in ('1', '19')
-    isuniquetp  = (not (channel['tpcode'] in tpcodes))
-    return (istvchannel and isuniquetp)
+def isepgchannel(channel, namespaces):
+    istvchannel = channel['STYPE'] in ('1', '25') # SD/HD
+    isuniquens  = (not (channel['NS'] in namespaces))
+    return (istvchannel and isuniquens)
 
 def genfav():
     filerules = open(rules)
@@ -92,7 +80,7 @@ def genfav():
 
         regexref = re.compile('^.{4}:.{8}:.{4}:.{4}:.{1}:.{1}:.{1}$')
         regexfav = re.compile(favregexp, re.IGNORECASE)
-        channels, tpcodes = [], []
+        channels, namespaces = [], []
         serviceref, servicesreading = None, False
         filelamedb = open(lamedb)
         for line in filelamedb:
@@ -109,8 +97,8 @@ def genfav():
                 if not regexfav.search(line.strip()):
                     continue
                 if favname.lower() == 'epgrefresh':
-                    if isepgchannel(channel, tpcodes):
-                        tpcodes.append(channel['tpcode'])
+                    if isepgchannel(channel, namespaces):
+                        namespaces.append(channel['NS'])
                         channels.append(channel)
                 else:
                     channels.append(channel)
