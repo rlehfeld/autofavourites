@@ -112,18 +112,14 @@ def gendefaultfav():
     favradioallfile.write('#NAME Favourites (Radio)\n')
     favradioallfile.close()
 
-def log(msg):
-    sys.stdout.write(msg)
-    sys.stdout.flush()
-
 def main():
-    log('Removing old files...\n')
+    print('Removing old files...')
     removeoldfiles()
-    log('Generating favourites index...\n')
+    print('Generating favourites index...')
     genfavindex()
-    log('Generating default favourites...\n')
+    print('Generating default favourites...')
     gendefaultfav()
-    log('Generating favourites...\n')
+    print('Generating favourites...')
     genfav()
 
 main()

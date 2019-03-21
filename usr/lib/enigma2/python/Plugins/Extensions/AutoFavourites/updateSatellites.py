@@ -12,13 +12,9 @@ URL_SOURCE_4 = 'http://satbr.herokuapp.com/satellites/source2.xml'
 OUT_DIR      = '/etc/enigma2/satellites.xml'
 #---------------------------------------------
 
-def log(msg):
-    sys.stdout.write(msg)
-    sys.stdout.flush()
-
 def main():
+    print('Downloading satellites.xml...')
     choice = str(sys.argv[1])
-    log('Downloading satellites.xml...\n')
     if choice is '1':
         urllib.urlretrieve(URL_SOURCE_1, OUT_DIR, context=ssl._create_unverified_context())
     elif choice is '2':
