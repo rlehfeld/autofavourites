@@ -68,8 +68,8 @@ def isepgchannel(channel, namespaces):
 
 def genfav():
     filerules = open(rules)
-    for line in filerules:
-        favname, favregexp = extractrule(line)
+    for rline in filerules:
+        favname, favregexp = extractrule(rline)
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
