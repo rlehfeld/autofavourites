@@ -59,7 +59,7 @@ def extractchannel(name, serviceref):
 def writechannels(channels, favfile):
     channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
     for channel in channels:
-        favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0:\n' % channel)
+        favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
 
 def isepgchannel(channel, namespaces):
     istvchannel = channel['STYPE'] in ('1', '25') # SD/HD
@@ -68,8 +68,8 @@ def isepgchannel(channel, namespaces):
 
 def genfav():
     filerules = open(rules)
-    for rule in filerules:
-        favname, favregexp = extractrule(rule)
+    for line in filerules:
+        favname, favregexp = extractrule(line)
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
@@ -89,7 +89,7 @@ def genfav():
                 if regexref.match(line.strip()):
                     serviceref = line.strip()
                     continue
-                if regexfav.search(line.strip()):
+                if regexfav.match(line.strip()):
                     channel = extractchannel(line.strip(), serviceref)
                     if favname.lower() == 'epgrefresh':
                         if isepgchannel(channel, namespaces):
