@@ -54,7 +54,9 @@ def genfavindex():
 
 def extractchannel(name, serviceref):
     serv = serviceref.split(':')
-    return { 'NAME': name, 'SID': serv[0], 'NS': serv[1], 'TSID': serv[2], 'ONID': serv[3], 'STYPE': serv[4] }
+    channel = { 'NAME': name, 'SID': serv[0], 'NS': serv[1], 'TSID': serv[2], 'ONID': serv[3], 'STYPE': serv[4] }
+    channel['STYPE'] = '19' if channel['STYPE'] == '25' else channel['STYPE']
+    return channel
 
 def writechannels(channels, favfile):
     channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
@@ -62,7 +64,7 @@ def writechannels(channels, favfile):
         favfile.write('#SERVICE 1:0:%(STYPE)s:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
 
 def isepgchannel(channel, namespaces):
-    istvchannel = channel['STYPE'] in ('1', '25') # SD/HD
+    istvchannel = channel['STYPE'] in ('1', '19') # SD/HD
     isuniquens  = (not (channel['NS'] in namespaces))
     return (istvchannel and isuniquens)
 
@@ -73,7 +75,7 @@ def genfav():
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
 
-        regexref = re.compile('^.{4}:.{8}:.{4}:.{4}:.{1}:.{1}:.{1}$')
+        regexref = re.compile('^.{4}:.{8}:.{4}:.{4}')
         regexfav = re.compile(favregexp, re.IGNORECASE)
         channels, namespaces = [], []
         serviceref, servicesreading = None, False
@@ -82,12 +84,14 @@ def genfav():
             if line.strip() == 'services':
                 servicesreading = True
                 continue
-            if servicesreading and line.strip() == 'end':
-                servicesreading = False
-                continue
             if servicesreading:
+                if line.strip() == 'end':
+                    servicesreading = False
+                    continue
                 if regexref.match(line.strip()):
                     serviceref = line.strip()
+                    continue
+                if line.strip().startswith('p:'):
                     continue
                 if regexfav.match(line.strip()):
                     channel = extractchannel(line.strip(), serviceref)

@@ -22,6 +22,7 @@ from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
 from Screens.MessageBox import MessageBox
 from Screens.Standby import TryQuitMainloop
+from Screens.ScanSetup import *
 
 APP_NAME = 'AutoFavourites'
 AUTO_FAVOURITES = 'python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/autoFavourites.py'
@@ -87,7 +88,6 @@ class AutoFavourites:
 			self.updateSat('4')
 
 	def fastScan(self):
-		from Screens.ScanSetup import *
 		self.session.openWithCallback(self.openMenu, ScanSimple)
 
 	def genFav(self):
