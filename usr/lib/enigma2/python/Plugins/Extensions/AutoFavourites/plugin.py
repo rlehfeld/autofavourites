@@ -20,7 +20,6 @@ from enigma import eDVBDB
 from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
-from Screens.MessageBox import MessageBox
 from Screens.Standby import TryQuitMainloop
 from Screens.ScanSetup import *
 
