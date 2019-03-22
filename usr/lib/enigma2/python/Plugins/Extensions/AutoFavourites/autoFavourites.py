@@ -31,7 +31,7 @@ def removeoldfiles():
 
 def genfavfilename(name):
     name = unicodedata.normalize('NFKD', unicode(name, 'utf_8', errors='ignore')).encode('ASCII', 'ignore')
-	name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
+    name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
     return 'userbouquet.%s.tv' % name
 
 def extractrule(rule):
