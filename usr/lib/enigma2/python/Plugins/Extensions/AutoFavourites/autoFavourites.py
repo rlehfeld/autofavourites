@@ -60,55 +60,55 @@ def genfavindex():
     createtvindex()
     createradioindex()
 
-def extractchannel(name, serviceref):
+def extractservice(name, serviceref):
     ref = serviceref.split(':')
     return { 'NAME': name, 'SID': ref[0], 'NS': ref[1], 'TSID': ref[2], 'ONID': ref[3], 'STYPE': int(ref[4]) }
 
-def writechannels(channels, file):
-    channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
-    for channel in channels:
-        file.write('#SERVICE 1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
+def writeservices(services, file):
+    services = sorted(services, key=lambda service: service['NAME'].lower())
+    for service in services:
+        file.write('#SERVICE 1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % service)
 
-def writeblacklist(channels, file):
-    for channel in channels:
-        file.write('1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
+def writeblacklist(services, file):
+    for service in services:
+        file.write('1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % service)
 
-def isepgchannel(channel, namespaces):
-    istvchannel = channel['STYPE'] in [1, 19]
-    isuniquens  = (not (channel['NS'] in namespaces))
-    return (istvchannel and isuniquens)
+def isepgservice(service, namespaces):
+    istvservice = service['STYPE'] in [1, 19]
+    isuniquens  = (not (service['NS'] in namespaces))
+    return (istvservice and isuniquens)
 
-def loadchannels(favname, favregexp):
+def loadservices(favname, favregexp):
     regexfav = re.compile(favregexp, re.IGNORECASE)
-    channels, namespaces = [], []
+    services, namespaces = [], []
     f = open(outdir + '/lamedb').readlines()
     f = f[f.index("services\n")+1:-3]
     while len(f) > 2:
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
-        channel = extractchannel(servicename, serviceref)
+        service = extractservice(servicename, serviceref)
         if regexfav.match(servicename.strip()):
             if favname.lower() == 'epgrefresh':
-                if isepgchannel(channel, namespaces):
-                    namespaces.append(channel['NS'])
-                    channels.append(channel)
+                if isepgservice(service, namespaces):
+                    namespaces.append(service['NS'])
+                    services.append(service)
             else:
-                channels.append(channel)
+                services.append(service)
         f = f[3:]
-    return channels
+    return services
 
 def writeblacklistfile(favname, favregexp):
     if favname.lower() == 'blacklist':
         blacklistfile = open(outdir + '/blacklist', 'w')
-        channels = loadchannels(favname, favregexp)
-        writeblacklist(channels, blacklistfile)
+        services = loadservices(favname, favregexp)
+        writeblacklist(services, blacklistfile)
         blacklistfile.close()
 
 def writefavfile(favname, favregexp):
     if not favname.lower() in ['blacklist']:
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
-        channels = loadchannels(favname, favregexp)
-        writechannels(channels, favfile)
+        services = loadservices(favname, favregexp)
+        writeservices(services, favfile)
         favfile.close()
 
 def genblacklist():
