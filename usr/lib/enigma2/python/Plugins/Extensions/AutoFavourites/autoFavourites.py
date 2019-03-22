@@ -40,9 +40,8 @@ def createtvindex():
 
     filerules = open(rules)
     for rule in filerules:
-        favname ,__ ,favregexp = rule.split(':')
-        if not favname.lower() in ['blacklist']:
-            favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
+        favname ,__ ,__ = rule.split(':')
+        favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
 
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
     favindexfile.close()
@@ -66,7 +65,7 @@ def extracttransp(serviceref):
             ttype, tref = transpref.strip().split(' ')
             return [ttype, tref.split(':')]
         f = f[3:]
-    return None
+    raise Exception('Transponder not found!')
 
 def extractservice(name, serviceref):
     ref = serviceref.split(':')
@@ -95,7 +94,7 @@ def loadservices(favname, satpos, favregexp):
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
         service                  = extractservice(servicename, serviceref)
         ttype, transp            = extracttransp(serviceref)
-        issatposmatch            = satpos.lower() in ['999', transp[4]]
+        issatposmatch            = satpos in ['000', transp[4]]
         isservicenamematch       = regexfav.match(servicename.strip())
         if issatposmatch and isservicenamematch:
             if favname.lower() == 'epgrefresh':
@@ -107,33 +106,33 @@ def loadservices(favname, satpos, favregexp):
         f = f[3:]
     return services
 
-def writeblacklistfile(favname, favregexp):
-    if favname.lower() == 'blacklist':
-        blacklistfile = open(outdir + '/blacklist', 'w')
-        services = loadservices(favname, '999', favregexp)
-        writeblacklist(services, blacklistfile)
-        blacklistfile.close()
+def writeblacklistfile(favname, satpos, favregexp):
+    blistfile = open(outdir + '/blacklist', 'w')
+    services = loadservices(favname, satpos, favregexp)
+    writeblacklist(services, blistfile)
+    blistfile.close()
 
 def writefavfile(favname, satpos, favregexp):
-    if not favname.lower() in ['blacklist']:
-        favfile = open(outdir + '/' + genfavfilename(favname), 'w')
-        favfile.write('#NAME %s\n' % favname)
-        services = loadservices(favname, satpos, favregexp)
-        writeservices(services, favfile)
-        favfile.close()
+    favfile = open(outdir + '/' + genfavfilename(favname), 'w')
+    favfile.write('#NAME %s\n' % favname)
+    services = loadservices(favname, satpos, favregexp)
+    writeservices(services, favfile)
+    favfile.close()
 
 def genblacklist():
     filerules = open(rules)
     for rline in filerules:
-        favname, __, favregexp = rline.split(':')
-        writeblacklistfile(favname, favregexp)
+        favname, satpos, favregexp = rline.split(':')
+        if favname.lower() == 'blacklist':
+            writeblacklistfile(favname, satpos, favregexp)
     filerules.close()
 
 def genfav():
     filerules = open(rules)
     for rline in filerules:
         favname, satpos, favregexp = rline.split(':')
-        writefavfile(favname, satpos, favregexp)
+        if favname.lower() != 'blacklist':
+            writefavfile(favname, satpos, favregexp)
     filerules.close()
 
 def gendefaultfav():
