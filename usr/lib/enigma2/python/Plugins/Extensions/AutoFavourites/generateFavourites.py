@@ -67,9 +67,9 @@ def extracttransp(serviceref):
         f = f[3:]
     raise Exception('Transponder not found!')
 
-def extractservice(name, serviceref):
+def extractservice(serviceref, servicename):
     ref = serviceref.split(':')
-    return { 'name': name, 'sid': ref[0], 'ns': ref[1], 'tsid': ref[2], 'onid': ref[3], 'stype': int(ref[4]) }
+    return { 'name': servicename, 'sid': ref[0], 'ns': ref[1], 'tsid': ref[2], 'onid': ref[3], 'stype': int(ref[4]) }
 
 def writeservices(services, file):
     services = sorted(services, key=lambda service: service['name'].lower())
@@ -92,8 +92,8 @@ def loadservices(favname, satpos, favregexp):
     f = f[f.index("services\n")+1:-3]
     while f and f[0][:3] != 'end':
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
-        service                  = extractservice(servicename, serviceref)
-        ttype, transp            = extracttransp(serviceref)
+        service                  = extractservice(serviceref, servicename)
+        __, transp               = extracttransp(serviceref)
         issatposmatch            = satpos in ['000', transp[4]]
         isservicenamematch       = regexfav.match(servicename.strip())
         if issatposmatch and isservicenamematch:
