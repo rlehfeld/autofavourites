@@ -34,16 +34,13 @@ def genfavfilename(name):
     name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
     return 'userbouquet.%s.tv' % name
 
-def extractrule(rule):
-    return rule.strip().split(':')
-
 def createtvindex():
     favindexfile = open(outdir + '/bouquets.tv', 'w')
     favindexfile.write('#NAME User - bouquets (TV)\n')
 
     filerules = open(rules)
     for rule in filerules:
-        favname, favregexp = extractrule(rule)
+        favname ,__ ,favregexp = rule.split(':')
         if not favname.lower() in ['blacklist']:
             favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
 
@@ -60,36 +57,50 @@ def genfavindex():
     createtvindex()
     createradioindex()
 
+def extracttransp(serviceref):
+    f = open(outdir + '/lamedb').readlines()
+    f = f[f.index("transponders\n")+1:-3]
+    while (f and f[0][:3] != 'end'):
+        transpid, transpref = f[0][:-1], f[1][:-1]
+        if serviceref[5:23] == transpid:
+            ttype, tref = transpref.strip().split(' ')
+            return [ttype, tref.split(':')]
+        f = f[3:]
+    return None
+
 def extractservice(name, serviceref):
     ref = serviceref.split(':')
-    return { 'NAME': name, 'SID': ref[0], 'NS': ref[1], 'TSID': ref[2], 'ONID': ref[3], 'STYPE': int(ref[4]) }
+    return { 'name': name, 'sid': ref[0], 'ns': ref[1], 'tsid': ref[2], 'onid': ref[3], 'stype': int(ref[4]) }
 
 def writeservices(services, file):
-    services = sorted(services, key=lambda service: service['NAME'].lower())
+    services = sorted(services, key=lambda service: service['name'].lower())
     for service in services:
-        file.write('#SERVICE 1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % service)
+        file.write('#SERVICE 1:0:%(stype)x:%(sid)s:%(tsid)s:%(onid)s:%(ns)s:0:0:0\n' % service)
 
 def writeblacklist(services, file):
     for service in services:
-        file.write('1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % service)
+        file.write('1:0:%(stype)x:%(sid)s:%(tsid)s:%(onid)s:%(ns)s:0:0:0\n' % service)
 
 def isepgservice(service, namespaces):
-    istvservice = service['STYPE'] in [1, 19]
-    isuniquens  = (not (service['NS'] in namespaces))
+    istvservice = service['stype'] in [1, 19]
+    isuniquens  = (not (service['ns'] in namespaces))
     return (istvservice and isuniquens)
 
-def loadservices(favname, favregexp):
+def loadservices(favname, satpos, favregexp):
     regexfav = re.compile(favregexp, re.IGNORECASE)
     services, namespaces = [], []
     f = open(outdir + '/lamedb').readlines()
     f = f[f.index("services\n")+1:-3]
-    while len(f) > 2:
+    while f and f[0][:3] != 'end':
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
-        service = extractservice(servicename, serviceref)
-        if regexfav.match(servicename.strip()):
+        service                  = extractservice(servicename, serviceref)
+        ttype, transp            = extracttransp(serviceref)
+        issatposmatch            = satpos.lower() in ['999', transp[4]]
+        isservicenamematch       = regexfav.match(servicename.strip())
+        if issatposmatch and isservicenamematch:
             if favname.lower() == 'epgrefresh':
                 if isepgservice(service, namespaces):
-                    namespaces.append(service['NS'])
+                    namespaces.append(service['ns'])
                     services.append(service)
             else:
                 services.append(service)
@@ -99,30 +110,30 @@ def loadservices(favname, favregexp):
 def writeblacklistfile(favname, favregexp):
     if favname.lower() == 'blacklist':
         blacklistfile = open(outdir + '/blacklist', 'w')
-        services = loadservices(favname, favregexp)
+        services = loadservices(favname, '999', favregexp)
         writeblacklist(services, blacklistfile)
         blacklistfile.close()
 
-def writefavfile(favname, favregexp):
+def writefavfile(favname, satpos, favregexp):
     if not favname.lower() in ['blacklist']:
         favfile = open(outdir + '/' + genfavfilename(favname), 'w')
         favfile.write('#NAME %s\n' % favname)
-        services = loadservices(favname, favregexp)
+        services = loadservices(favname, satpos, favregexp)
         writeservices(services, favfile)
         favfile.close()
 
 def genblacklist():
     filerules = open(rules)
     for rline in filerules:
-        favname, favregexp = extractrule(rline)
+        favname, __, favregexp = rline.split(':')
         writeblacklistfile(favname, favregexp)
     filerules.close()
 
 def genfav():
     filerules = open(rules)
     for rline in filerules:
-        favname, favregexp = extractrule(rline)
-        writefavfile(favname, favregexp)
+        favname, satpos, favregexp = rline.split(':')
+        writefavfile(favname, satpos, favregexp)
     filerules.close()
 
 def gendefaultfav():
