@@ -59,10 +59,14 @@ def extractchannel(name, serviceref):
     ref = serviceref.split(':')
     return { 'NAME': name, 'SID': ref[0], 'NS': ref[1], 'TSID': ref[2], 'ONID': ref[3], 'STYPE': int(ref[4]) }
 
-def writechannels(channels, favfile):
+def writechannels(channels, file):
     channels = sorted(channels, key=lambda channel: channel['NAME'].lower())
     for channel in channels:
-        favfile.write('#SERVICE 1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
+        file.write('#SERVICE 1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
+
+def writeblacklist(channels, file):
+    for channel in channels:
+        file.write('1:0:%(STYPE)x:%(SID)s:%(TSID)s:%(ONID)s:%(NS)s:0:0:0\n' % channel)
 
 def isepgchannel(channel, namespaces):
     istvchannel = channel['STYPE'] in [1, 19]
@@ -107,7 +111,7 @@ def genblacklist():
         if favname.lower() == 'blacklist':
             blacklistfile = open(outdir + '/blacklist', 'w')
             channels = loadchannels(favname, favregexp)
-            writechannels(channels, blacklistfile)
+            writeblacklist(channels, blacklistfile)
             blacklistfile.close()
     filerules.close()
 

@@ -17,6 +17,7 @@ VERSION = '0.2.5'
 
 from enigma import eDVBDB
 
+from Components.ParentalControl import parentalControl
 from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
@@ -47,8 +48,15 @@ class AutoFavourites:
 	def openMenu(self):
 		self.session.openWithCallback(self.menuDone, ChoiceBox, title = self.global_title, list = self.menu_options)
 
-	def generateCallback(self):
+	def reloadBouquets():
 		eDVBDB.getInstance().reloadBouquets()
+
+	def reloadBlackList():
+		parentalControl.open()
+
+	def generateCallback(self):
+		self.reloadBouquets()
+		self.reloadBlackList()
 		self.openMenu()
 
 	def updateSatCallback(self):
