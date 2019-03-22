@@ -78,7 +78,6 @@ class AutoFavourites:
 
 		(description, choice) = option
 		if choice is 'generate':
-
 			self.session.openWithCallback(self.generateCallback, Console, title = self.global_title, cmdlist = ['python %s' % GEN_FAV_PATH])
 		elif choice is 'update':
 			self.session.openWithCallback(self.updateCallback, ChoiceBox, title = self.global_title, list = self.sat_options)
