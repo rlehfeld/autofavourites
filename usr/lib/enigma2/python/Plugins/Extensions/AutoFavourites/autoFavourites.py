@@ -79,57 +79,50 @@ def isepgchannel(channel, namespaces):
     return (istvchannel and isuniquens)
 
 def loadchannels(favname, favregexp):
-    channels, namespaces = [], []
-    serviceref, servicesreading = None, False
-    regexref = re.compile('^.{4}:.{8}:.{4}:.{4}')
     regexfav = re.compile(favregexp, re.IGNORECASE)
-
-    filelamedb = open(outdir + '/lamedb')
-    for line in filelamedb:
-        if line.strip() == 'services':
-            servicesreading = True
-            continue
-        if servicesreading:
-            if line.strip() == 'end':
-                servicesreading = False
-                continue
-            if line.strip().startswith('p:'):
-                continue
-            if regexref.match(line.strip()):
-                serviceref = line.strip()
-                continue
-            if regexfav.match(line.strip()):
-                channel = extractchannel(line.strip(), serviceref)
-                if favname.lower() == 'epgrefresh':
-                    if isepgchannel(channel, namespaces):
-                        namespaces.append(channel['NS'])
-                        channels.append(channel)
-                else:
+    channels, namespaces = [], []
+    f = open(outdir + '/lamedb').readlines()
+    f = f[f.index("services\n")+1:-3]
+    while len(f) > 2:
+    	serviceref, servicename  = f[0][:-1], f[1][:-1]
+        channel = extractchannel(servicename, serviceref)
+        if regexfav.match(servicename.strip()):
+            if favname.lower() == 'epgrefresh':
+                if isepgchannel(channel, namespaces):
+                    namespaces.append(channel['NS'])
                     channels.append(channel)
-    filelamedb.close()
+            else:
+                channels.append(channel)
+        f = f[3:]
     return channels
+
+def writeblacklistfile(favname, favregexp):
+    if favname.lower() == 'blacklist':
+        blacklistfile = open(outdir + '/blacklist', 'w')
+        channels = loadchannels(favname, favregexp)
+        writeblacklist(channels, blacklistfile)
+        blacklistfile.close()
+
+def writefavfile(favname, favregexp):
+    if not favname.lower() in ['blacklist']:
+        favfile = open(outdir + '/' + genfavfilename(favname), 'w')
+        favfile.write('#NAME %s\n' % favname)
+        channels = loadchannels(favname, favregexp)
+        writechannels(channels, favfile)
+        favfile.close()
 
 def genblacklist():
     filerules = open(rules)
     for rline in filerules:
         favname, favregexp = extractrule(rline)
-        if favname.lower() == 'blacklist':
-            blacklistfile = open(outdir + '/blacklist', 'w')
-            channels = loadchannels(favname, favregexp)
-            writeblacklist(channels, blacklistfile)
-            blacklistfile.close()
+        writeblacklistfile(favname, favregexp)
     filerules.close()
 
 def genfav():
     filerules = open(rules)
     for rline in filerules:
         favname, favregexp = extractrule(rline)
-        if not favname.lower() in ['blacklist']:
-            favfile = open(outdir + '/' + genfavfilename(favname), 'w')
-            favfile.write('#NAME %s\n' % favname)
-            channels = loadchannels(favname, favregexp)
-            writechannels(channels, favfile)
-            favfile.close()
+        writefavfile(favname, favregexp)
     filerules.close()
 
 def gendefaultfav():
