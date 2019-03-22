@@ -1,4 +1,4 @@
-#!/usr/bin/python
+OUT_DIR#!/usr/bin/python
 
 import os
 import glob
@@ -12,20 +12,20 @@ import unicodedata
 #   D       D     X     X   X    X    X  X          X           X
 
 #---------------------------------------------
-outdir = '/etc/enigma2'
-rules  = '/etc/bouquetRules.cfg'
+OUT_DIR = '/etc/enigma2'
+RULES_CONF  = '/etc/bouquetRules.cfg'
 #---------------------------------------------
 
 def removeoldfiles():
-    userbouquets = glob.glob(outdir + '/userbouquet.*')
+    userbouquets = glob.glob(OUT_DIR + '/userbouquet.*')
     for userbouquet in userbouquets:
         os.remove(userbouquet)
 
-    bouquetindexes = glob.glob(outdir + '/bouquets.*')
+    bouquetindexes = glob.glob(OUT_DIR + '/bouquets.*')
     for bouquetindex in bouquetindexes:
         os.remove(bouquetindex)
 
-    blacklists = glob.glob(outdir + '/blacklist')
+    blacklists = glob.glob(OUT_DIR + '/blacklist')
     for blacklist in blacklists:
         os.remove(blacklist)
 
@@ -35,19 +35,20 @@ def genfavfilename(name):
     return 'userbouquet.%s.tv' % name
 
 def createtvindex():
-    favindexfile = open(outdir + '/bouquets.tv', 'w')
+    favindexfile = open(OUT_DIR + '/bouquets.tv', 'w')
     favindexfile.write('#NAME User - bouquets (TV)\n')
 
-    filerules = open(rules)
+    filerules = open(RULES_CONF)
     for rule in filerules:
         favname ,__ ,__ = rule.split(':')
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
+    filerules.close()
 
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
     favindexfile.close()
 
 def createradioindex():
-    radioindexfile = open(outdir + '/bouquets.radio', 'w')
+    radioindexfile = open(OUT_DIR + '/bouquets.radio', 'w')
     radioindexfile.write('#NAME User - bouquets (RADIO)\n')
     radioindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.radio" ORDER BY bouquet\n')
     radioindexfile.close()
@@ -57,7 +58,7 @@ def genfavindex():
     createradioindex()
 
 def extracttransp(serviceref):
-    f = open(outdir + '/lamedb').readlines()
+    f = open(OUT_DIR + '/lamedb').readlines()
     f = f[f.index("transponders\n")+1:-3]
     while (f and f[0][:3] != 'end'):
         transpid, transpref = f[0][:-1], f[1][:-1]
@@ -88,7 +89,7 @@ def isepgservice(service, namespaces):
 def loadservices(favname, satpos, favregexp):
     regexfav = re.compile(favregexp, re.IGNORECASE)
     services, namespaces = [], []
-    f = open(outdir + '/lamedb').readlines()
+    f = open(OUT_DIR + '/lamedb').readlines()
     f = f[f.index("services\n")+1:-3]
     while f and f[0][:3] != 'end':
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
@@ -107,20 +108,20 @@ def loadservices(favname, satpos, favregexp):
     return services
 
 def writeblacklistfile(favname, satpos, favregexp):
-    blistfile = open(outdir + '/blacklist', 'w')
+    blistfile = open(OUT_DIR + '/blacklist', 'w')
     services = loadservices(favname, satpos, favregexp)
     writeblacklist(services, blistfile)
     blistfile.close()
 
 def writefavfile(favname, satpos, favregexp):
-    favfile = open(outdir + '/' + genfavfilename(favname), 'w')
+    favfile = open(OUT_DIR + '/' + genfavfilename(favname), 'w')
     favfile.write('#NAME %s\n' % favname)
     services = loadservices(favname, satpos, favregexp)
     writeservices(services, favfile)
     favfile.close()
 
 def genblacklist():
-    filerules = open(rules)
+    filerules = open(RULES_CONF)
     for rline in filerules:
         favname, satpos, favregexp = rline.split(':')
         if favname.lower() == 'blacklist':
@@ -128,7 +129,7 @@ def genblacklist():
     filerules.close()
 
 def genfav():
-    filerules = open(rules)
+    filerules = open(RULES_CONF)
     for rline in filerules:
         favname, satpos, favregexp = rline.split(':')
         if favname.lower() != 'blacklist':
@@ -136,11 +137,11 @@ def genfav():
     filerules.close()
 
 def gendefaultfav():
-    favtvallfile = open(outdir + '/userbouquet.favourites.tv', 'w')
+    favtvallfile = open(OUT_DIR + '/userbouquet.favourites.tv', 'w')
     favtvallfile.write('#NAME Favourites (TV)\n')
     favtvallfile.close()
 
-    favradioallfile = open(outdir + '/userbouquet.favourites.radio', 'w')
+    favradioallfile = open(OUT_DIR + '/userbouquet.favourites.radio', 'w')
     favradioallfile.write('#NAME Favourites (Radio)\n')
     favradioallfile.close()
 

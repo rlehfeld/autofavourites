@@ -23,7 +23,9 @@ from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
 from Screens.Standby import TryQuitMainloop
 
-APP_NAME = 'AutoFavourites'
+APP_NAME 		= 'AutoFavourites'
+GEN_FAV_PATH 	= '/usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/generateFavourites.py'
+UPDATE_SAT_PATH = '/usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/updateSatellites.py'
 
 class AutoFavourites:
 
@@ -76,16 +78,15 @@ class AutoFavourites:
 
 		(description, choice) = option
 		if choice is 'generate':
-			path = '/usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/generateFavourites.py'
-			self.session.openWithCallback(self.generateCallback, Console, title = self.global_title, cmdlist = ['python %s' % path])
+
+			self.session.openWithCallback(self.generateCallback, Console, title = self.global_title, cmdlist = ['python %s' % GEN_FAV_PATH])
 		elif choice is 'update':
 			self.session.openWithCallback(self.updateCallback, ChoiceBox, title = self.global_title, list = self.sat_options)
 		elif choice is 'exit':
 			self.session.close
 
 	def updateSat(self, source):
-		path = '/usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/updateSatellites.py'
-		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = ['python %s %s' % (path, source)])
+		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = ['python %s %s' % (UPDATE_SAT_PATH, source)])
 
 ###############################################################################
 def main(session, **kwargs):
