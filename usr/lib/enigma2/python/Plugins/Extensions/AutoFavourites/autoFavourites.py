@@ -37,23 +37,28 @@ def genfavfilename(name):
 def extractrule(rule):
     return rule.strip().split(':')
 
-def genfavindex():
+def createtvindex():
     favindexfile = open(outdir + '/bouquets.tv', 'w')
     favindexfile.write('#NAME User - bouquets (TV)\n')
 
     filerules = open(rules)
     for rule in filerules:
         favname, favregexp = extractrule(rule)
-        if favname.lower() != 'blacklist':
+        if not favname.lower() in ['blacklist']:
             favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
 
     favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
     favindexfile.close()
 
+def createradioindex():
     radioindexfile = open(outdir + '/bouquets.radio', 'w')
     radioindexfile.write('#NAME User - bouquets (RADIO)\n')
     radioindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.radio" ORDER BY bouquet\n')
     radioindexfile.close()
+
+def genfavindex():
+    createtvindex()
+    createradioindex()
 
 def extractchannel(name, serviceref):
     ref = serviceref.split(':')
@@ -119,7 +124,7 @@ def genfav():
     filerules = open(rules)
     for rline in filerules:
         favname, favregexp = extractrule(rline)
-        if favname.lower() != 'blacklist':
+        if not favname.lower() in ['blacklist']:
             favfile = open(outdir + '/' + genfavfilename(favname), 'w')
             favfile.write('#NAME %s\n' % favname)
             channels = loadchannels(favname, favregexp)

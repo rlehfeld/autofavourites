@@ -22,9 +22,9 @@ from Plugins.Plugin import PluginDescriptor
 from Screens.Console import Console
 from Screens.ChoiceBox import ChoiceBox
 from Screens.Standby import TryQuitMainloop
-from Screens.ScanSetup import *
 
 APP_NAME = 'AutoFavourites'
+APP_PATH = '/usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/autoFavourites.py'
 
 class AutoFavourites:
 
@@ -32,10 +32,9 @@ class AutoFavourites:
 		self.session = session
 		self.global_title = APP_NAME + ' ' + VERSION
 		self.menu_options = [
-			(_('Automatic scan'), 'scan'),
-			(_('Add to bouquet'), 'generate'),
-			(_('Update') + ' satellite.xml', 'update'),
-			(_('Exit'), 'exit')
+			('Generate Favourites', 'generate'),
+			('Update Satellites', 'update'),
+			('Exit', 'exit')
 		]
 		self.sat_options = [
 			('OE-Alliance', 'alliance'),
@@ -59,8 +58,11 @@ class AutoFavourites:
 		self.reloadBlackList()
 		self.openMenu()
 
-	def updateSatCallback(self):
+	def restartInterface():
 		self.session.open(TryQuitMainloop, 3)
+
+	def updateSatCallback(self):
+		self.restartInterface()
 		return False
 
 	def updateCallback(self, option):
@@ -74,19 +76,15 @@ class AutoFavourites:
 			return False
 
 		(description, choice) = option
-		if choice is 'scan':
-			self.session.openWithCallback(self.openMenu, ScanSimple)
-		elif choice is 'generate':
-			cmd = ['python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/autoFavourites.py']
-			self.session.openWithCallback(self.generateCallback, Console, title = self.global_title, cmdlist = cmd)
+		if choice is 'generate':
+			self.session.openWithCallback(self.generateCallback, Console, title = self.global_title, cmdlist = ['python %s' % APP_PATH])
 		elif choice is 'update':
 			self.session.openWithCallback(self.updateCallback, ChoiceBox, title = self.global_title, list = self.sat_options)
 		elif choice is 'exit':
 			self.session.close
 
 	def updateSat(self, source):
-		cmd = ['python /usr/lib/enigma2/python/Plugins/Extensions/AutoFavourites/updateSatellites.py' + ' ' + source]
-		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = cmd)
+		self.session.openWithCallback(self.updateSatCallback, Console, title = self.global_title, cmdlist = ['python %s %s' % (APP_PATH, source)])
 
 ###############################################################################
 def main(session, **kwargs):
