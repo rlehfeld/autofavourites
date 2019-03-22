@@ -70,7 +70,7 @@ def isepgchannel(channel, namespaces):
     return (istvchannel and isuniquens)
 
 def loadchannels(favname, favregexp):
-    channels, namespaces = [], [], []
+    channels, namespaces = [], []
     serviceref, servicesreading = None, False
     regexref = re.compile('^.{4}:.{8}:.{4}:.{4}')
     regexfav = re.compile(favregexp, re.IGNORECASE)
