@@ -12,8 +12,8 @@ import unicodedata
 #   D       D     X     X   X    X    X  X          X           X
 
 #---------------------------------------------
-outdir    = '/etc/enigma2'
-rules     = '/etc/bouquetRules.cfg'
+outdir = '/etc/enigma2'
+rules  = '/etc/bouquetRules.cfg'
 #---------------------------------------------
 
 def removeoldfiles():

@@ -47,10 +47,10 @@ class AutoFavourites:
 	def openMenu(self):
 		self.session.openWithCallback(self.menuDone, ChoiceBox, title = self.global_title, list = self.menu_options)
 
-	def reloadBouquets():
+	def reloadBouquets(self):
 		eDVBDB.getInstance().reloadBouquets()
 
-	def reloadBlackList():
+	def reloadBlackList(self):
 		parentalControl.open()
 
 	def generateCallback(self):
@@ -58,7 +58,7 @@ class AutoFavourites:
 		self.reloadBlackList()
 		self.openMenu()
 
-	def restartInterface():
+	def restartInterface(self):
 		self.session.open(TryQuitMainloop, 3)
 
 	def updateSatCallback(self):
