@@ -51,12 +51,8 @@ class AutoFavourites:
 	def reloadBouquets(self):
 		eDVBDB.getInstance().reloadBouquets()
 
-	def reloadBlackList(self):
-		parentalControl.open()
-
 	def generateCallback(self):
 		self.reloadBouquets()
-		self.reloadBlackList()
 		self.openMenu()
 
 	def restartInterface(self):
