@@ -33,8 +33,8 @@ def createtvindex():
     favindexfile.write('#NAME User - bouquets (TV)\n')
 
     filerules = open(RULES_CONF)
-    for rule in filerules:
-        favname ,__ = rule.split(':')
+    for rline in filerules:
+        favname ,__ = rline[:-1].split(':')
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
     filerules.close()
 
@@ -56,7 +56,7 @@ def extractservice(serviceref, servicename):
     return { 'name': servicename, 'sid': ref[0], 'ns': ref[1], 'tsid': ref[2], 'onid': ref[3], 'stype': int(ref[4]) }
 
 def isepgservice(service, namespaces):
-    istvservice = service['stype'] in [1, 19]
+    istvservice = service['stype'] in [1, 25]
     isuniquens  = (not (service['ns'] in namespaces))
     return (istvservice and isuniquens)
 
@@ -68,7 +68,7 @@ def loadservices(favname, favregexp):
     while f and f[0][:3] != 'end':
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
         service = extractservice(serviceref, servicename)
-        if regexfav.match(servicename.strip()):
+        if regexfav.match(servicename):
             if favname.lower() == 'epgrefresh':
                 if isepgservice(service, namespaces):
                     namespaces.append(service['ns'])
@@ -90,7 +90,7 @@ def writefavfile(favname, favregexp):
 def genfav():
     filerules = open(RULES_CONF)
     for rline in filerules:
-        favname, favregexp = rline.split(':')
+        favname, favregexp = rline[:-1].split(':')
         writefavfile(favname, favregexp)
     filerules.close()
 
