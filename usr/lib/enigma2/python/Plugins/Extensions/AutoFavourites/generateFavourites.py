@@ -31,20 +31,16 @@ def genfavfilename(name):
 def createtvindex():
     favindexfile = open(OUT_DIR + '/bouquets.tv', 'w')
     favindexfile.write('#NAME User - bouquets (TV)\n')
-
     filerules = open(RULES_CONF)
     for rline in filerules:
         favname ,__ = rline[:-1].split(':')
         favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(favname))
     filerules.close()
-
-    favindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.tv" ORDER BY bouquet\n')
     favindexfile.close()
 
 def createradioindex():
     radioindexfile = open(OUT_DIR + '/bouquets.radio', 'w')
     radioindexfile.write('#NAME User - bouquets (RADIO)\n')
-    radioindexfile.write('#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "userbouquet.favourites.radio" ORDER BY bouquet\n')
     radioindexfile.close()
 
 def genfavindex():
@@ -94,22 +90,11 @@ def genfav():
         writefavfile(favname, favregexp)
     filerules.close()
 
-def gendefaultfav():
-    favtvallfile = open(OUT_DIR + '/userbouquet.favourites.tv', 'w')
-    favtvallfile.write('#NAME Favourites (TV)\n')
-    favtvallfile.close()
-
-    favradioallfile = open(OUT_DIR + '/userbouquet.favourites.radio', 'w')
-    favradioallfile.write('#NAME Favourites (Radio)\n')
-    favradioallfile.close()
-
 def main():
     print('Removing old files...')
     removeoldfiles()
     print('Generating favourites index...')
     genfavindex()
-    print('Generating default favourites...')
-    gendefaultfav()
     print('Generating favourites...')
     genfav()
 
