@@ -68,7 +68,7 @@ def loadservices(favname, favregexp):
     while f and f[0][:3] != 'end':
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
         service = extractservice(serviceref, servicename)
-        if regexfav.match(servicename):
+        if regexfav.search(servicename):
             if favname.lower() == 'epgrefresh':
                 if isepgservice(service, namespaces):
                     namespaces.append(service['ns'])
