@@ -15,13 +15,13 @@ OUT_DIR       = '/etc/enigma2/satellites.xml'
 def main():
     print('Downloading satellites.xml...')
     choice = str(sys.argv[1])
-    if choice is 'alliance':
+    if choice == 'alliance':
         urllib.urlretrieve(URL_ALLIANCE, OUT_DIR, context=ssl._create_unverified_context())
-    elif choice is 'openpli':
+    elif choice == 'openpli':
         urllib.urlretrieve(URL_OPENPLI, OUT_DIR, context=ssl._create_unverified_context())
-    elif choice is 'portaleds':
+    elif choice == 'portaleds':
         urllib.urlretrieve(URL_PORTALEDS, OUT_DIR, context=ssl._create_unverified_context())
-    elif choice is 'portalbsd':
+    elif choice == 'portalbsd':
         urllib.urlretrieve(URL_PORTALBSD, OUT_DIR, context=ssl._create_unverified_context())
 
 main()
