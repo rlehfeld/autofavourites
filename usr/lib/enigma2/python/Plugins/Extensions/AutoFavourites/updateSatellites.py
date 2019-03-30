@@ -7,8 +7,8 @@ import urllib, ssl
 #---------------------------------------------
 URL_ALLIANCE  = 'http://raw.githubusercontent.com/oe-alliance/oe-alliance-tuxbox-common/master/src/satellites.xml'
 URL_OPENPLI   = 'http://raw.githubusercontent.com/OpenPLi/tuxbox-xml/master/xml/satellites.xml'
-URL_PORTALEDS = 'http://satbr.herokuapp.com/satellites/source1.xml'
-URL_PORTALBSD = 'http://satbr.herokuapp.com/satellites/source2.xml'
+URL_PORTALEDS = 'http://raw.githubusercontent.com/lazaronixon/autofavourites_satellites/master/portal_eds/satellites.xml'
+URL_PORTALBSD = 'https://raw.githubusercontent.com/lazaronixon/autofavourites_satellites/master/portal_bsd/satellites.xml'
 OUT_DIR       = '/etc/enigma2/satellites.xml'
 #---------------------------------------------
 
