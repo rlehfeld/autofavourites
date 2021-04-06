@@ -51,23 +51,25 @@ def extractservice(serviceref, servicename):
     ref = serviceref.split(':')
     return { 'name': servicename, 'sid': ref[0], 'ns': ref[1], 'tsid': ref[2], 'onid': ref[3], 'stype': int(ref[4]) }
 
-def isepgservice(service, namespaces):
+def isepgservice(service, transponders):
+    transponder = ":".join([service['ns'], service['tsid'],service['onid']])
     istvservice = service['stype'] in [1, 25]
-    isuniquens  = (not (service['ns'] in namespaces))
-    return (istvservice and isuniquens)
+    isunique = (not (transponder in transponders))
+    return (istvservice and isunique)
 
 def loadservices(favname, favregexp):
     regexfav = re.compile(favregexp, re.IGNORECASE)
-    services, namespaces = [], []
+    services, transponders = [], []
     f = open(OUT_DIR + '/lamedb').readlines()
     f = f[f.index("services\n")+1:-3]
     while f and f[0][:3] != 'end':
     	serviceref, servicename  = f[0][:-1], f[1][:-1]
         service = extractservice(serviceref, servicename)
+        transponder = ":".join([service['ns'], service['tsid'], service['onid']])
         if regexfav.search(servicename):
             if favname.lower() == 'epgrefresh':
-                if isepgservice(service, namespaces):
-                    namespaces.append(service['ns'])
+                if isepgservice(service, transponders):
+                    transponders.append(transponder)
                     services.append(service)
             else:
                 services.append(service)
