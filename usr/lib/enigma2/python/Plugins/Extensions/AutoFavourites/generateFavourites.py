@@ -24,7 +24,7 @@ def removeoldfiles():
         os.remove(bouquetindex)
 
 def genfavfilename(name):
-    name = unicodedata.normalize('NFKD', unicode(name, 'utf_8', errors='ignore')).encode('ASCII', 'ignore')
+    name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode('utf-8')
     name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
     return 'userbouquet.%s.tv' % name
 
@@ -63,7 +63,7 @@ def loadservices(favname, favregexp):
     f = open(OUT_DIR + '/lamedb').readlines()
     f = f[f.index("services\n")+1:-3]
     while f and f[0][:3] != 'end':
-    	serviceref, servicename  = f[0][:-1], f[1][:-1]
+        serviceref, servicename  = f[0][:-1], f[1][:-1]
         service = extractservice(serviceref, servicename)
         transponder = ":".join([service['ns'], service['tsid'], service['onid']])
         if regexfav.search(servicename):
