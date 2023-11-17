@@ -35,10 +35,10 @@ You can test your regular expressions and learn a little bit here http://pythex.
 
 ### StarOne C2
 ```
-Abertos:^Globo |Aparecida|^Canção Nova|Bandeirantes|RecordTV|Rede TV|Rede Vida|SBT|TV Anhanguera Goiânia|TV Cultura|^TV Globo|TV Bahia|^TV Verdes
+Abertos:^Globo |^TV Aparecida$|^Canção Nova|^Bandeirantes$|RecordTV|Rede TV|^Rede Vida$|^SBT$|TV Anhanguera Goiânia|TV Cultura|^TV Globo|TV Bahia|^TV Verdes
 Documentários:Animal Planet|Discovery Channel|H2|National Geographic|The History Channel|Nat Geo|NatGeo|^History|^Zoo
 Esportes:^EL$|Band Alternativo|Band Sports|Bandsports|Combate|^ESPN|^Fox Sports|Premiere|^SporTV|^Ei Maxx|^Paramount\+
-Filmes e Séries:AMC|AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount Network|Prime Box|Sony|^STAR|Space|Studio Universal|Syfy|TBS|TCM|^Telecine|TNT|^Universal|^Warner
+Filmes e Séries:AMC|AXN|Canal Brasil|Cinemax|^Fox$|^Fox HD$|FX|^HBO|I-SAT|^Max|MegaPix|Paramount Network|Prime Box|Sony|^STAR|Space|Studio Universal|Syfy|TBS|TCM|^Telecine|TNT|^Universal|^Warner|USA
 Internacional:^NHK|^RAI$|^SIC|TV España|TV5 Monde|Deutsche Welle|^DW|^TVE$
 Infantis:Boomerang|^Cartoon|Discovery Kids|^Disney|^Gloob|^Nick|Play TV|Tooncast|TV Rá Tim Bum
 Noticias:^CNN|CNT|GloboNews|Record News|Band News
