@@ -51,28 +51,52 @@ class config:
         with open(os.path.join(CONFIG.out_dir, 'lamedb')) as lamedb:
             f = lamedb.readlines()
 
-        f = f[f.index("services\n")+1:-3]
+        f = f[f.index("services\n")+1:-1]
 
         self._services = []
-        while f and f[0][:3] != 'end':
-            serviceref, servicename  = f[0][:-1], f[1][:-1]
-            self._services.append(self._extractservice(serviceref, servicename))
+        while f and f[0].rstrip('\r\n') != 'end':
+            serviceref, servicename, serviceinfo = (
+                f[0].rstrip('\r\n'),
+                f[1].rstrip('\r\n'),
+                f[2].rstrip('\r\n')
+            )
+
+            self._services.append(
+                self._extractservice(
+                    serviceref,
+                    servicename,
+                    serviceinfo,
+                )
+            )
             f = f[3:]
 
     def get_services(self):
         return self._services
 
     @staticmethod
-    def _extractservice(serviceref, servicename):
+    def _extractservice(serviceref, servicename, serviceinfo):
         ref = serviceref.split(':')
-        return {
-            'name': servicename,
-            'sid': ref[0],
-            'ns': ref[1],
-            'tsid': ref[2],
-            'onid': ref[3],
-            'stype': int(ref[4])
-        }
+        info = serviceinfo.split(',')
+
+        kv = {}
+
+        for i in info:
+            k, v = i.split(':', 2)
+            if k not in kv:
+                kv[k] = []
+            kv[k].append(v)
+
+        kv.update(
+            {
+                'name': servicename,
+                'sid': ref[0],
+                'ns': ref[1],
+                'tsid': ref[2],
+                'onid': ref[3],
+                'stype': int(ref[4])
+            }
+        )
+        return kv
 
 CONFIG = config()
 
@@ -84,9 +108,9 @@ def removeoldfiles():
 
 def genfavfilename(rule):
     name = unicodedata.normalize('NFKD', rule['name']).encode('ASCII', 'ignore').decode('utf-8')
-    name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
+    name = re.sub('[^a-z0-9]+', '_', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
     mode = rule.get('mode', 'tv')
-    return 'userbouquet.autofav-%s.%s' % (rule['name'], mode.lower())
+    return 'userbouquet.autofav-%s.%s' % (name, mode.lower())
 
 def createindex(mode):
     bouquetindex = 'bouquets.%s' % mode
@@ -120,6 +144,15 @@ def isepgservice(service, transponders, transponder):
     isunique = (not (transponder in transponders))
     return (istvservice and isunique)
 
+def includes(stationvalue, servicevalue):
+    if stationvalue == servicevalue:
+        return True
+    if not isinstance(servicevalue, list):
+        return False
+    if isinstance(stationvalue, list):
+        return bool(set(servicevalue) & set(stationvalue))
+    return stationvalue in servicevalue
+
 def loadservices(rule):
     allservices = []
     transponders = []
@@ -129,7 +162,8 @@ def loadservices(rule):
         regexfav = re.compile(station['regexp']) if 'regexp' in station else None
 
         for service in CONFIG.get_services():
-            if all(service[key] == station[key] for key in service.keys() if key in station.keys()):
+            if all(includes(station[key], service[key])
+                   for key in service.keys() if key in station.keys()):
                 if regexfav is None or regexfav.search(service['name']):
                     if rule['name'] == 'epgrefresh':
                         transponder = ':'.join([service['ns'], service['tsid'], service['onid']])
