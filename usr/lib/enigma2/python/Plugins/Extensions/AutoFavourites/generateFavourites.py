@@ -178,7 +178,9 @@ def loadservices(rule):
                         addservice = service.copy()
                         addservice['icam'] = station.get('icam', False)
                         services.append(addservice)
-        allservices.extend(sorted(services, key=lambda service: service['name'].lower()))
+        for service in sorted(services, key=lambda service: service['name'].lower()):
+            if service not in allservices:
+                allservices.append(service)
 
     return allservices
 
