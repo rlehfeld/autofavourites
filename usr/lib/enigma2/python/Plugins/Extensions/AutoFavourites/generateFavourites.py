@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
-#	SID:NS:TSID:ONID:STYPE:UNUSED(channelnumber in enigma1)
-#	X   X  X    X    D     D
+#   SID:NS:TSID:ONID:STYPE:UNUSED(channelnumber in enigma1)
+#   X   X  X    X    D     D
 
-#	REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
+#   REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
 #   D       D     X     X   X    X    X  X          X           X
 
 import os
@@ -38,6 +38,10 @@ class config:
         try:
             with open(self.rules_conf) as filerules:
                 self._rules = json.load(filerules)
+                for rule in self._rules:
+                    for station in rule['stations']:
+                        if 'ns' in station:
+                            station['ns'] = int(station['ns'], 16)
         except FileNotFoundError:
             pass
 
@@ -89,11 +93,11 @@ class config:
         kv.update(
             {
                 'name': servicename,
-                'sid': ref[0],
-                'ns': ref[1],
-                'tsid': ref[2],
-                'onid': ref[3],
-                'stype': int(ref[4])
+                'sid': int(ref[0], 16),
+                'ns': int(ref[1], 16),
+                'tsid': int(ref[2], 16),
+                'onid': int(ref[3], 16),
+                'stype': int(ref[4], 10)
             }
         )
         return kv
@@ -171,7 +175,9 @@ def loadservices(rule):
                             transponders.append(transponder)
                             services.append(service)
                     else:
-                        services.append(service)
+                        addservice = service.copy()
+                        addservice['icam'] = station.get('icam', False)
+                        services.append(addservice)
         allservices.extend(sorted(services, key=lambda service: service['name'].lower()))
 
     return allservices
@@ -180,7 +186,14 @@ def writefavfile(rule):
     with open(os.path.join(CONFIG.out_dir, genfavfilename(rule)), 'w') as favfile:
         favfile.write('#NAME %s\n' % rule['name'])
         for service in loadservices(rule):
-            favfile.write('#SERVICE 1:0:%(stype)x:%(sid)s:%(tsid)s:%(onid)s:%(ns)s:0:0:0\n' % service)
+            if service.get('icam', False):
+                description = re.sub('[^a-zA-Z0-9 ]', '', service['name'])
+                url = 'http%%3a//127.0.0.1%%3a17999/1%%3a0%%3a%(stype)X%%3a%(sid)X%%3a%(tsid)X%%3a%(onid)X%%3a%(ns)X%%3a0%%3a0%%3a0%%3a' % service
+                serviceinfo = '#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
+                favfile.write('%s:%s:%s\n' % (serviceinfo, url, description))
+                favfile.write('#DESCRIPTION %s\n' % description)
+            else:
+                favfile.write('#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0\n' % service)
 
 def genfav():
     rules = CONFIG.get_rules()
