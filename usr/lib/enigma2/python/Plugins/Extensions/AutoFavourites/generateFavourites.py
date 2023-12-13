@@ -34,45 +34,50 @@ class config:
         self._prefix = os.path.expanduser(value)
 
     def parse_rules(self):
-        self._rules = []
         try:
             with open(self.rules_conf) as filerules:
                 self._rules = json.load(filerules)
-                for rule in self._rules:
-                    for station in rule['stations']:
+                for rule in self._rules.get('rules', []):
+                    for station in rule.get('stations', []):
                         if 'ns' in station:
                             station['ns'] = int(station['ns'], 16)
         except FileNotFoundError:
-            pass
+            self._rules = {}
 
     def get_rules(self):
-        return self._rules
+        return self._rules.get('rules', [])
 
     def has_rules(self):
         return bool(self.get_rules())
 
     def parse_services(self):
-        with open(os.path.join(CONFIG.out_dir, 'lamedb')) as lamedb:
-            f = lamedb.readlines()
-
-        f = f[f.index("services\n")+1:-1]
+        databases = glob.glob(
+            os.path.join(CONFIG.out_dir, self._rules.get('database', 'lamedb'))
+        )
 
         self._services = []
-        while f and f[0].rstrip('\r\n') != 'end':
-            serviceref, servicename, serviceinfo = (
-                f[0].rstrip('\r\n'),
-                f[1].rstrip('\r\n'),
-                f[2].rstrip('\r\n')
-            )
 
-            self._services.append(
-                self._extractservice(
-                    serviceref,
-                    servicename,
-                    serviceinfo,
+        for database in databases:
+            with open(database) as lamedb:
+                f = lamedb.readlines()
+
+            f = f[f.index("services\n")+1:-1]
+
+            while f and f[0].rstrip('\r\n') != 'end':
+                serviceref, servicename, serviceinfo = (
+                    f[0].rstrip('\r\n'),
+                    f[1].rstrip('\r\n'),
+                    f[2].rstrip('\r\n')
                 )
-            )
-            f = f[3:]
+
+                self._services.append(
+                    self._extractservice(
+                        serviceref,
+                        servicename,
+                        serviceinfo,
+                    )
+                )
+                f = f[3:]
 
     def get_services(self):
         return self._services
