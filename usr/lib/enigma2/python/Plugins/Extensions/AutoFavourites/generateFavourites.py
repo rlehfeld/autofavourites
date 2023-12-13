@@ -204,8 +204,6 @@ def main():
     print('Parsing rules config...')
     CONFIG.parse_rules()
     if CONFIG.has_rules():
-        # TODO: remove debug print
-        print(CONFIG.get_rules())
         print('Parsing available services...')
         CONFIG.parse_services()
         print('Removing old files...')
