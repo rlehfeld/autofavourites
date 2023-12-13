@@ -77,35 +77,43 @@ class config:
 CONFIG = config()
 
 def removeoldfiles():
-    userbouquets = glob.glob(os.path.join(CONFIG.out_dir, 'userbouquet.*'))
+    userbouquets = glob.glob(os.path.join(CONFIG.out_dir, 'userbouquet.autofav-*.tv'))
     for userbouquet in userbouquets:
+        print('Removing %s' % userbouquet)
         os.remove(userbouquet)
 
-    bouquetindexes = glob.glob(os.path.join(CONFIG.out_dir, 'bouquets.*'))
-    for bouquetindex in bouquetindexes:
-        os.remove(bouquetindex)
-
-def genfavfilename(name):
-    name = unicodedata.normalize('NFKD', name).encode('ASCII', 'ignore').decode('utf-8')
+def genfavfilename(rule):
+    name = unicodedata.normalize('NFKD', rule['name']).encode('ASCII', 'ignore').decode('utf-8')
     name = re.sub('[^a-z0-9]', '', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
-    return 'userbouquet.%s.tv' % name
+    mode = rule.get('mode', 'tv')
+    return 'userbouquet.autofav-%s.%s' % (rule['name'], mode.lower())
 
-def createtvindex():
-    with open(os.path.join(CONFIG.out_dir, 'bouquets.tv'), 'w') as favindexfile:
-        favindexfile.write('#NAME User - bouquets (TV)\n')
-        rules = CONFIG.get_rules
+def createindex(mode):
+    bouquetindex = 'bouquets.%s' % mode
+    services = []
+    with open(os.path.join(CONFIG.out_dir, bouquetindex), 'r') as favindexfile:
+        for line in favindexfile:
+            if line.startswith('#SERVICE ') and -1 == line.find('"userbouquet.autofav-'):
+                services.append(line)
+
+    bouquettype = 'TV' if mode.lower() == 'tv' else 'Radio'
+    rules = CONFIG.get_rules()
+    prefix = '#SERVICE 1:7:%i:0:0:0:0:0:0:0' % (1 if mode == 'tv' else 2)
+
+    with open(os.path.join(CONFIG.out_dir, bouquetindex), 'w') as favindexfile:
+        favindexfile.write('#NAME User - bouquets (%s)\n' % bouquettype)
+        for service in services:
+            favindexfile.write(service)
+
         for rule in rules:
-            favindexfile.write(
-                '#SERVICE 1:7:1:0:0:0:0:0:0:0:FROM BOUQUET "%s" ORDER BY bouquet\n' % genfavfilename(rule['name'])
-            )
-
-def createradioindex():
-    with open(os.path.join(CONFIG.out_dir, 'bouquets.radio'), 'w') as radioindexfile:
-        radioindexfile.write('#NAME User - bouquets (RADIO)\n')
+            if rule.get('mode', 'tv').lower() == mode:
+                favindexfile.write(
+                    '%s:FROM BOUQUET "%s" ORDER BY bouquet\n' % (prefix, genfavfilename(rule))
+                )
 
 def genfavindex():
-    createtvindex()
-    createradioindex()
+    createindex('tv')
+    createindex('radio')
 
 def isepgservice(service, transponders, transponder):
     istvservice = service['stype'] in [1, 25]
@@ -135,7 +143,7 @@ def loadservices(rule):
     return allservices
 
 def writefavfile(rule):
-    with open(os.path.join(CONFIG.out_dir, genfavfilename(rule['name'])), 'w') as favfile:
+    with open(os.path.join(CONFIG.out_dir, genfavfilename(rule)), 'w') as favfile:
         favfile.write('#NAME %s\n' % rule['name'])
         for service in loadservices(rule):
             favfile.write('#SERVICE 1:0:%(stype)x:%(sid)s:%(tsid)s:%(onid)s:%(ns)s:0:0:0\n' % service)
@@ -153,10 +161,10 @@ def main():
         print(CONFIG.get_rules())
         print('Parsing available services...')
         CONFIG.parse_services()
-        #print('Removing old files...')
-        #removeoldfiles()
-        #print('Generating favourites index...')
-        #genfavindex()
+        print('Removing old files...')
+        removeoldfiles()
+        print('Generating favourites index...')
+        genfavindex()
         print('Generating favourites...')
         genfav()
     else:
