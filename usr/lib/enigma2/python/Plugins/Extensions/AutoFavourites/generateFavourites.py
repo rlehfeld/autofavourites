@@ -200,7 +200,7 @@ def writefavfile(rule):
                 favfile.write('%s:%s:%s\n' % (serviceinfo, url, description))
                 favfile.write('#DESCRIPTION %s\n' % description)
             else:
-                favfile.write('#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0\n' % service)
+                favfile.write('#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:\n' % service)
 
 def genfav():
     rules = CONFIG.get_rules()
