@@ -1,12 +1,19 @@
 #!/usr/bin/python
 
-#   lamedb:
-#   =======
+#   lamedb transponders:
+#   ====================
+#   NS:TSID:ONID
+#   X  X    X
+#   DVBType Frequenz:SymbolRate:Polarisation:FEC:SatPosition:Inversion ???????
+#   [cts]   D        D          D            D   D           D
+
+#   lamedb services:
+#   ================
 #   SID:NS:TSID:ONID:STYPE:UNUSED(channelnumber in enigma1)
 #   X   X  X    X    D     D
 
-#   bouquet files
-#   =============
+#   bouquet files:
+#   ==============
 #   REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
 #   D       D     X     X   X    X    X  X          X           X
 
@@ -175,11 +182,13 @@ def loadservices(rule):
         regexfav = re.compile(station['regexp']) if 'regexp' in station else None
 
         for service in CONFIG.get_services():
-            if all(includes(station[key], service[key])
-                   for key in service.keys() if key in station.keys()):
+            if (not any(includes(station['!' + key], service[key])
+                                 for key in service.keys() if ('!' + key) in station.keys()) and
+                all(includes(station[key], service[key])
+                    for key in service.keys() if key in station.keys())):
                 if regexfav is None or regexfav.search(service['name']):
                     if rule['name'] == 'epgrefresh':
-                        transponder = ':'.join([service['ns'], service['tsid'], service['onid']])
+                        transponder = '%(ns)08X:%(tsid)04X:%(onid)04X' % service
                         if isepgservice(service, transponders, transponser):
                             transponders.append(transponder)
                             services.append(service)
@@ -187,6 +196,7 @@ def loadservices(rule):
                         addservice = service.copy()
                         addservice['icam'] = station.get('icam', False)
                         services.append(addservice)
+
         for service in sorted(services, key=lambda service: service['name'].lower()):
             if service not in allservices:
                 allservices.append(service)
