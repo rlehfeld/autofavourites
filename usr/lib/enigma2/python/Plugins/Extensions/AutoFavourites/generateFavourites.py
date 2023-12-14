@@ -213,9 +213,9 @@ def writefavfile(rule):
         for service in loadservices(rule):
             if service.get('icam', False):
                 description = re.sub('[^a-zA-Z0-9 ]', '', service['name'])
-                url = 'http%%3a//127.0.0.1%%3a17999/1%%3a0%%3a%(stype)X%%3a%(sid)X%%3a%(tsid)X%%3a%(onid)X%%3a%(ns)X%%3a0%%3a0%%3a0%%3a' % service
+                url = 'http://127.0.0.1:17999/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 serviceinfo = '#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
-                print(u'%s:%s:%s' % (serviceinfo, url, description), file=favfile)
+                print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), description), file=favfile)
                 print(u'#DESCRIPTION %s' % description, file=favfile)
             else:
                 print(u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service, file=favfile)
