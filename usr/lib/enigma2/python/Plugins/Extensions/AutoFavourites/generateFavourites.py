@@ -1,8 +1,12 @@
 #!/usr/bin/python
 
+#   lamedb:
+#   =======
 #   SID:NS:TSID:ONID:STYPE:UNUSED(channelnumber in enigma1)
 #   X   X  X    X    D     D
 
+#   bouquet files
+#   =============
 #   REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
 #   D       D     X     X   X    X    X  X          X           X
 
