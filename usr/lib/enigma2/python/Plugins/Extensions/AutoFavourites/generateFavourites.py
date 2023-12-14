@@ -66,15 +66,29 @@ class config(object):
         try:
             with io.open(self.rules_conf, encoding='utf8') as filerules:
                 self._rules = json.load(filerules)
+
+                # radio service types
+                self._rules.setdefault('radio', [2, 10])
+
+                # tv service types
+                self._rules.setdefault('tv', [1, 17, 22, 25, 135, 195])
+
                 for rule in self._rules.get('rules', []):
+                    rule['mode'] = rule.get('mode', 'tv').lower()
+
                     for station in rule.get('stations', []):
                         if 'ns' in station:
                             station['ns'] = int(station['ns'], 16)
+                        station.setdefault('stype', self._rules[rule['mode']])
+
         except (OSError, IOError):
             self._rules = {}
 
     def get_rules(self):
         return self._rules.get('rules', [])
+
+    def get_service_types(mode):
+        return self._rules['mode']
 
     def has_rules(self):
         return bool(self.get_rules())
@@ -150,7 +164,7 @@ def removeoldfiles():
 def genfavfilename(rule):
     name = unicodedata.normalize('NFKD', rule['name']).encode('ASCII', 'ignore').decode('utf-8')
     name = re.sub(r'[^a-z0-9]+', '_', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
-    mode = rule.get('mode', 'tv')
+    mode = rule['mode']
     return 'userbouquet.autofav-%s.%s' % (name, mode.lower())
 
 def createindex(mode):
@@ -171,7 +185,7 @@ def createindex(mode):
             print(service, file=favindexfile)
 
         for rule in rules:
-            if rule.get('mode', 'tv').lower() == mode:
+            if rule['mode'] == mode:
                 print(
                     u'%s:FROM BOUQUET "%s" ORDER BY bouquet' % (prefix, genfavfilename(rule)),
                     file=favindexfile
@@ -182,18 +196,19 @@ def genfavindex():
     createindex('radio')
 
 def isepgservice(service, transponders, transponder):
-    istvservice = service['stype'] in [1, 25]
+    istvservice = service['stype'] in CONFIG.get_service_types('tv')
     isunique = (not (transponder in transponders))
     return (istvservice and isunique)
 
 def includes(stationvalue, servicevalue):
-    if stationvalue == servicevalue:
-        return True
-    if not isinstance(servicevalue, list):
-        return False
+    if isinstance(servicevalue, list):
+        if isinstance(stationvalue, list):
+            return bool(set(servicevalue) & set(stationvalue))
+        return stationvalue in servicevalue
+
     if isinstance(stationvalue, list):
-        return bool(set(servicevalue) & set(stationvalue))
-    return stationvalue in servicevalue
+        return servicevalue in stationvalue
+    return stationvalue == servicevalue
 
 def loadservices(rule):
     allservices = []
