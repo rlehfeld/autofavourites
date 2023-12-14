@@ -17,14 +17,17 @@
 #   REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
 #   D       D     X     X   X    X    X  X          X           X
 
+from __future__ import print_function
+
 import os
+import io
 import sys
 import glob
 import re
 import json
 import unicodedata
 
-class config:
+class config(object):
     def __init__(self, prefix=os.sep):
         self.prefix = prefix
 
@@ -46,13 +49,13 @@ class config:
 
     def parse_rules(self):
         try:
-            with open(self.rules_conf) as filerules:
+            with io.open(self.rules_conf, encoding='utf8') as filerules:
                 self._rules = json.load(filerules)
                 for rule in self._rules.get('rules', []):
                     for station in rule.get('stations', []):
                         if 'ns' in station:
                             station['ns'] = int(station['ns'], 16)
-        except FileNotFoundError:
+        except (OSError, IOError):
             self._rules = {}
 
     def get_rules(self):
@@ -69,7 +72,7 @@ class config:
         self._services = []
 
         for database in databases:
-            with open(database) as lamedb:
+            with io.open(database, encoding='utf8') as lamedb:
                 f = lamedb.readlines()
 
             f = f[f.index("services\n")+1:-1]
@@ -135,7 +138,7 @@ def genfavfilename(rule):
 def createindex(mode):
     bouquetindex = 'bouquets.%s' % mode
     services = []
-    with open(os.path.join(CONFIG.out_dir, bouquetindex), 'r') as favindexfile:
+    with io.open(os.path.join(CONFIG.out_dir, bouquetindex), 'r', encoding='utf8') as favindexfile:
         for line in favindexfile:
             if line.startswith('#SERVICE ') and -1 == line.find('"userbouquet.autofav-'):
                 services.append(line)
@@ -144,15 +147,16 @@ def createindex(mode):
     rules = CONFIG.get_rules()
     prefix = '#SERVICE 1:7:%i:0:0:0:0:0:0:0' % (1 if mode == 'tv' else 2)
 
-    with open(os.path.join(CONFIG.out_dir, bouquetindex), 'w') as favindexfile:
-        favindexfile.write('#NAME User - bouquets (%s)\n' % bouquettype)
+    with io.open(os.path.join(CONFIG.out_dir, bouquetindex), 'w', encoding='utf8') as favindexfile:
+        print(u'#NAME User - bouquets (%s)' % bouquettype, file=favindexfile)
         for service in services:
-            favindexfile.write(service)
+            print(service, file=favindexfile)
 
         for rule in rules:
             if rule.get('mode', 'tv').lower() == mode:
-                favindexfile.write(
-                    '%s:FROM BOUQUET "%s" ORDER BY bouquet\n' % (prefix, genfavfilename(rule))
+                print(
+                    u'%s:FROM BOUQUET "%s" ORDER BY bouquet' % (prefix, genfavfilename(rule)),
+                    file=favindexfile
                 )
 
 def genfavindex():
@@ -204,17 +208,17 @@ def loadservices(rule):
     return allservices
 
 def writefavfile(rule):
-    with open(os.path.join(CONFIG.out_dir, genfavfilename(rule)), 'w') as favfile:
-        favfile.write('#NAME %s\n' % rule['name'])
+    with io.open(os.path.join(CONFIG.out_dir, genfavfilename(rule)), 'w', encoding='utf8') as favfile:
+        print(u'#NAME %s' % rule['name'], file=favfile)
         for service in loadservices(rule):
             if service.get('icam', False):
                 description = re.sub('[^a-zA-Z0-9 ]', '', service['name'])
                 url = 'http%%3a//127.0.0.1%%3a17999/1%%3a0%%3a%(stype)X%%3a%(sid)X%%3a%(tsid)X%%3a%(onid)X%%3a%(ns)X%%3a0%%3a0%%3a0%%3a' % service
                 serviceinfo = '#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
-                favfile.write('%s:%s:%s\n' % (serviceinfo, url, description))
-                favfile.write('#DESCRIPTION %s\n' % description)
+                print(u'%s:%s:%s' % (serviceinfo, url, description), file=favfile)
+                print(u'#DESCRIPTION %s' % description, file=favfile)
             else:
-                favfile.write('#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:\n' % service)
+                print(u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service, file=favfile)
 
 def genfav():
     rules = CONFIG.get_rules()
