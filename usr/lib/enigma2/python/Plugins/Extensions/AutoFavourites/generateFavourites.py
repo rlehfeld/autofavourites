@@ -183,13 +183,13 @@ def loadservices(rule):
 
     for station in rule['stations']:
         services = []
-        regexfav = re.compile(station['regexp']) if 'regexp' in station else None
+        regexfav = re.compile(station['regexp'], re.U) if 'regexp' in station else None
 
         for service in CONFIG.get_services():
             if (not any(includes(station['!' + key], service[key])
                                  for key in service.keys() if ('!' + key) in station.keys()) and
-                all(includes(station[key], service[key])
-                    for key in service.keys() if key in station.keys())):
+                    all(includes(station[key], service[key])
+                        for key in service.keys() if key in station.keys())):
                 if regexfav is None or regexfav.search(service['name']):
                     if rule['name'] == 'epgrefresh':
                         transponder = '%(ns)08X:%(tsid)04X:%(onid)04X' % service
