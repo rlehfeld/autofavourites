@@ -134,7 +134,7 @@ def removeoldfiles():
 
 def genfavfilename(rule):
     name = unicodedata.normalize('NFKD', rule['name']).encode('ASCII', 'ignore').decode('utf-8')
-    name = re.sub('[^a-z0-9]+', '_', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
+    name = re.sub(r'[^a-z0-9]+', '_', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
     mode = rule.get('mode', 'tv')
     return 'userbouquet.autofav-%s.%s' % (name, mode.lower())
 
@@ -215,7 +215,7 @@ def writefavfile(rule):
         print(u'#NAME %s' % rule['name'], file=favfile)
         for service in loadservices(rule):
             if service.get('icam', False):
-                description = re.sub('[^a-zA-Z0-9 ]', '', service['name'])
+                description = re.sub(r'[^a-zA-Z0-9 ]', '', service['name'])
                 url = CONFIG.get_icamprefix() + u'/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 serviceinfo = u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
                 print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), description), file=favfile)
