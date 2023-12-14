@@ -64,6 +64,9 @@ class config(object):
     def has_rules(self):
         return bool(self.get_rules())
 
+    def get_icamprefix(self):
+        return self._rules.get('icam', u'http://127.0.0.1:17999')
+
     def parse_services(self):
         databases = glob.glob(
             os.path.join(CONFIG.out_dir, self._rules.get('database', 'lamedb'))
@@ -213,8 +216,8 @@ def writefavfile(rule):
         for service in loadservices(rule):
             if service.get('icam', False):
                 description = re.sub('[^a-zA-Z0-9 ]', '', service['name'])
-                url = 'http://127.0.0.1:17999/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
-                serviceinfo = '#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
+                url = CONFIG.get_icamprefix() + u'/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
+                serviceinfo = u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
                 print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), description), file=favfile)
                 print(u'#DESCRIPTION %s' % description, file=favfile)
             else:
