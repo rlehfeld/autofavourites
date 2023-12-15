@@ -237,6 +237,13 @@ def true(_):
 def false(_):
     return False
 
+def toregexp(value, default):
+    if value is None:
+        return default
+    if isinstance(value, list):
+        value = '|'.join(value)
+    return re.compile(value, re.U).search
+
 def loadservices(rule):
     allservices = []
     transponders = []
@@ -244,8 +251,8 @@ def loadservices(rule):
     print('Parsing %s...' % rule['name'])
     for station in rule['stations']:
         services = []
-        regexfav = re.compile(station['regexp'], re.U).search if 'regexp' in station else true
-        notregexfav = re.compile(station['!regexp'], re.U).search if '!regexp' in station else false
+        regexfav = toregexp(station.get('regexp', None), true)
+        notregexfav = toregexp(station.get('!regexp', None), false)
 
         for service in CONFIG.get_services():
             if (not any(includes(station['!' + key], service[key])
