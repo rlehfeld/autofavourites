@@ -166,7 +166,7 @@ def removeoldfiles():
 
 def genfavfilename(rule):
     name = unicodedata.normalize('NFKD', rule['name']).encode('ASCII', 'ignore').decode('utf-8')
-    name = re.sub(r'[^a-z0-9]+', '_', name.replace('&', 'and').replace('+', 'plus').replace('*', 'star').lower())
+    name = re.sub(r'[^a-z0-9]+', '_', name.replace('&', 'and').replace('/', 'and').replace('+', 'plus').replace('*', 'star').lower())
     mode = rule['mode']
     return 'userbouquet.autofav-%s.%s' % (name, mode.lower())
 
