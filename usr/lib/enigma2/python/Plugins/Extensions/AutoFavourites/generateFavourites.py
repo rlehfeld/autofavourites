@@ -77,8 +77,11 @@ class config(object):
                     rule['mode'] = rule.get('mode', 'tv').lower()
 
                     for station in rule.get('stations', []):
-                        if 'ns' in station:
-                            station['ns'] = int(station['ns'], 16)
+                        for key in ('sid', 'ns', 'tsid', 'onid', 'stype'):
+                            for k in (key, '!' + key):
+                                if k in station:
+                                    station[k] = toint(station[k])
+
                         station.setdefault('stype', self._rules[rule['mode']])
 
         except (OSError, IOError):
@@ -191,6 +194,24 @@ def createindex(mode):
                     file=favindexfile
                 )
 
+def tohex(value):
+    if isinstance(value, list):
+        return [tohex(v) for v in value]
+    if isinstance(value, dict):
+        return {k: tohex(v) for k, v in value.items()}
+    if value is not True and value is not False and isinstance(value, int):
+        return '%x' % value
+    return value
+
+def toint(value):
+    if isinstance(value, list):
+        return [toint(v) for v in value]
+    if isinstance(value, dict):
+        return {k: toint(v) for k, v in value.items()}
+    if value is not True and value is not False and not isinstance(value, int):
+        return int(value, 16)
+    return value
+
 def genfavindex():
     createindex('tv')
     createindex('radio')
@@ -221,9 +242,9 @@ def loadservices(rule):
 
         for service in CONFIG.get_services():
             if (not any(includes(station['!' + key], service[key])
-                                 for key in service.keys() if ('!' + key) in station.keys()) and
+                        for key in service if ('!' + key) in station) and
                     all(includes(station[key], service[key])
-                        for key in service.keys() if key in station.keys())):
+                        for key in service if key in station)):
                 if regexfav is None or regexfav.search(service['name']):
                     if rule['name'] == 'epgrefresh':
                         transponder = '%(ns)08X:%(tsid)04X:%(onid)04X' % service
@@ -239,9 +260,11 @@ def loadservices(rule):
         for service in sorted(services, key=lambda service: service['name'].lower()):
             if service not in allservices:
                 if rule.get('keepduplicates', False) or service['name'] not in (s['name'] for s in allservices):
+                    if rule.get('debug', False):
+                        print('Added %s' % tohex(service))
                     allservices.append(service)
-                else:
-                    print('found %s but skipping as channel with same name exists' % service)
+                elif rule.get('debug', False):
+                    print('Skipping %s as channel name already existing.' % tohex(service))
 
     return allservices
 
