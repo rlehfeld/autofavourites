@@ -231,6 +231,12 @@ def includes(stationvalue, servicevalue):
         return servicevalue in stationvalue
     return stationvalue == servicevalue
 
+def true(_):
+    return True
+
+def false(_):
+    return False
+
 def loadservices(rule):
     allservices = []
     transponders = []
@@ -238,14 +244,15 @@ def loadservices(rule):
     print('Parsing %s...' % rule['name'])
     for station in rule['stations']:
         services = []
-        regexfav = re.compile(station['regexp'], re.U) if 'regexp' in station else None
+        regexfav = re.compile(station['regexp'], re.U).search if 'regexp' in station else true
+        notregexfav = re.compile(station['!regexp'], re.U).search if '!regexp' in station else false
 
         for service in CONFIG.get_services():
             if (not any(includes(station['!' + key], service[key])
                         for key in service if ('!' + key) in station) and
                     all(includes(station[key], service[key])
                         for key in service if key in station)):
-                if regexfav is None or regexfav.search(service['name']):
+                if not notregexfav(service['name']) and regexfav(service['name']):
                     if rule['name'] == 'epgrefresh':
                         transponder = '%(ns)08X:%(tsid)04X:%(onid)04X' % service
                         if not isepgservice(service, transponders, transponser):
