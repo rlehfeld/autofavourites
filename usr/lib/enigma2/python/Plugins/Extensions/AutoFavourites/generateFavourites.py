@@ -258,6 +258,7 @@ def loadservices(rule):
                         if not isepgservice(service, transponders, transponser):
                             continue
                         transponders.append(transponder)
+                        addservice = servoce
                     else:
                         addservice = service.copy()
                         addservice['icam'] = station.get('icam', False)
