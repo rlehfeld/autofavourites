@@ -173,7 +173,7 @@ def createindex(mode):
     with io.open(os.path.join(CONFIG.out_dir, bouquetindex), 'r', encoding='utf8') as favindexfile:
         for line in favindexfile:
             if line.startswith('#SERVICE ') and -1 == line.find('"userbouquet.autofav-'):
-                services.append(line)
+                services.append(line.rstrip('\r\n'))
 
     bouquettype = 'TV' if mode.lower() == 'tv' else 'Radio'
     rules = CONFIG.get_rules()
@@ -214,6 +214,7 @@ def loadservices(rule):
     allservices = []
     transponders = []
 
+    print('Parsing %s...' % rule['name'])
     for station in rule['stations']:
         services = []
         regexfav = re.compile(station['regexp'], re.U) if 'regexp' in station else None
@@ -226,17 +227,21 @@ def loadservices(rule):
                 if regexfav is None or regexfav.search(service['name']):
                     if rule['name'] == 'epgrefresh':
                         transponder = '%(ns)08X:%(tsid)04X:%(onid)04X' % service
-                        if isepgservice(service, transponders, transponser):
-                            transponders.append(transponder)
-                            services.append(service)
+                        if not isepgservice(service, transponders, transponser):
+                            continue
+                        transponders.append(transponder)
                     else:
                         addservice = service.copy()
                         addservice['icam'] = station.get('icam', False)
-                        services.append(addservice)
+
+                    services.append(addservice)
 
         for service in sorted(services, key=lambda service: service['name'].lower()):
             if service not in allservices:
-                allservices.append(service)
+                if rule.get('keepduplicates', False) or service['name'] not in (s['name'] for s in allservices):
+                    allservices.append(service)
+                else:
+                    print('found %s but skipping as channel with same name exists' % service)
 
     return allservices
 
