@@ -28,8 +28,9 @@
 #   type 24 = advanced codec SD NVOD reference service (NYI)
 #   type 25 = advanced codec HD digital television
 #   type 27 = advanced codec HD NVOD reference service (NYI)
+#   type 31 = UHD
 
-#   service_types_tv = '1:7:1:0:0:0:0:0:0:0:(type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 134) || (type == 195)'
+#   service_types_tv = '1:7:1:0:0:0:0:0:0:0:(type == 1) || (type == 17) || (type == 22) || (type == 25) || (type == 31) || (type == 134) || (type == 195)'
 #   service_types_radio = '1:7:2:0:0:0:0:0:0:0:(type == 2) || (type == 10)'
 
 from __future__ import print_function
@@ -71,7 +72,7 @@ class config(object):
                 self._rules.setdefault('radio', [2, 10])
 
                 # tv service types
-                self._rules.setdefault('tv', [1, 17, 22, 25, 135, 195])
+                self._rules.setdefault('tv', [1, 17, 22, 25, 31, 135, 195])
 
                 for rule in self._rules.get('rules', []):
                     rule['mode'] = rule.get('mode', 'tv').lower()
