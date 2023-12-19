@@ -242,7 +242,7 @@ def toregexp(value, default):
     if value is None:
         return default
     if isinstance(value, list):
-        value = '|'.join(value)
+        value = '|'.join(map(lambda p: '(?:%s)' % p,  value))
     return re.compile(value, re.U).search
 
 def integer(value):
@@ -315,6 +315,7 @@ def writefavfile(rule):
         for service in loadservices(rule):
             if service.get('icam', False):
                 description = re.sub(r'[^a-zA-Z0-9 ]', '', service['name'])
+                description = re.sub(r'\s+', ' ', description)
                 url = CONFIG.get_icamprefix() + u'/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 serviceinfo = u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
                 print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), description), file=favfile)
