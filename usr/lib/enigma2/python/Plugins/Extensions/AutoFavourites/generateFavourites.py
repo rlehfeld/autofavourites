@@ -147,7 +147,7 @@ class config(object):
 
         kv.update(
             {
-                'name': servicename,
+                'name': re.sub(r'[^\w\s{}()\[\]]', '', servicename),
                 'sid': int(ref[0], 16),
                 'ns': int(ref[1], 16),
                 'tsid': int(ref[2], 16),
@@ -266,7 +266,7 @@ class Tuple(tuple):
         return False
 
 def splitchannel(service):
-    channel = re.sub(r'[^\w\d\s]', '', service['name'])
+    channel = re.sub(r'[^\w\s]', '', service['name'])
     t = Tuple(integer(t) for t in re.findall(r'[^\d\s]+|\d+', channel.lower()))
     return t
 
@@ -314,7 +314,7 @@ def writefavfile(rule):
         print(u'#NAME %s' % rule['name'], file=favfile)
         for service in loadservices(rule):
             if service.get('icam', False):
-                description = re.sub(r'[^a-zA-Z0-9 ]', '', service['name'])
+                description = re.sub(r'[^\w\s]', '', service['name'])
                 description = re.sub(r'\s+', ' ', description)
                 url = CONFIG.get_icamprefix() + u'/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 serviceinfo = u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
