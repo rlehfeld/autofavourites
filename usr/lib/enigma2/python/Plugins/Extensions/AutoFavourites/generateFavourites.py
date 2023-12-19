@@ -244,6 +244,31 @@ def toregexp(value, default):
         value = '|'.join(value)
     return re.compile(value, re.U).search
 
+def integer(value):
+    try:
+        return int(value)
+    except ValueError:
+        return value
+
+class Tuple(tuple):
+    def __new__(self, *args):
+        return tuple.__new__(Tuple, tuple(*args))
+
+    def __lt__(self, other):
+        for k, v in zip(self, other):
+            if k != v:
+                if isinstance(k, type(v)):
+                    return k < v
+                if isinstance(k, str):
+                    return True
+                return False
+        return False
+
+def splitchannel(service):
+    channel = re.sub(r'[^\w\d\s]', '', service['name'])
+    t = Tuple(integer(t) for t in re.findall(r'[^\d\s]+|\d+', channel.lower()))
+    return t
+
 def loadservices(rule):
     allservices = []
     transponders = []
@@ -272,7 +297,7 @@ def loadservices(rule):
 
                     services.append(addservice)
 
-        for service in sorted(services, key=lambda service: service['name'].lower()):
+        for service in sorted(services, key=splitchannel):
             if service not in allservices:
                 if rule.get('keepduplicates', False) or service['name'] not in (s['name'] for s in allservices):
                     if rule.get('debug', False):
