@@ -14,8 +14,8 @@
 
 #   bouquet files:
 #   ==============
-#   REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:UNUSED
-#   D       D     X     X   X    X    X  X          X           X
+#   REFTYPE:FLAGS:STYPE:SID:TSID:ONID:NS:PARENT_SID:PARENT_TSID:PATH:NAME
+#   D       D     X     X   X    X    X  X          X           S    S
 
 #   service types:
 #   ==============
@@ -327,6 +327,15 @@ def loadservices(rule):
 
     return allservices
 
+def urlencode(url):
+    parts = []
+    for c in url:
+        if c == ':' or c == '%' or ord(c) < 32:
+            parts.append('%%%02x' % ord(c))
+        else:
+            parts.append(c)
+    return u''.join(parts)
+
 def writefavfile(rule):
     with io.open(os.path.join(CONFIG.out_dir, genfavfilename(rule)), 'w', encoding='utf8') as favfile:
         print(u'#NAME %s' % rule['name'], file=favfile)
@@ -334,13 +343,13 @@ def writefavfile(rule):
             if service.get('icam', False):
                 url = CONFIG.get_icamprefix() + u'/%(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 serviceinfo = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
-                print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), service['name']), file=favfile)
+                print(u'%s:%s:%s' % (serviceinfo, urlencode(url), service['name']), file=favfile)
                 print(u'#DESCRIPTION %s' % service['name'], file=favfile)
             else:
                 url = service.get('url')
                 servicestr = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 if url is not None:
-                    servicestr += url.replace(':', '%3a') + ':%(name)s' % service
+                    servicestr += urlencode(url) + ':%(name)s' % service
                 print(servicestr, file=favfile)
 
 def genfav():
