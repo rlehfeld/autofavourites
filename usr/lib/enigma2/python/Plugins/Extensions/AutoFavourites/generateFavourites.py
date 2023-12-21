@@ -327,7 +327,7 @@ def loadservices(rule):
 
     return allservices
 
-def urlencode(url):
+def bouquetencode(url):
     parts = []
     for c in url:
         if c == ':' or c == '%' or ord(c) < 32:
@@ -343,13 +343,13 @@ def writefavfile(rule):
             if service.get('icam', False):
                 url = CONFIG.get_icamprefix() + u'/%(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 serviceinfo = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
-                print(u'%s:%s:%s' % (serviceinfo, urlencode(url), service['name']), file=favfile)
+                print(u'%s:%s:%s' % (serviceinfo, bouquetencode(url), service['name']), file=favfile)
                 print(u'#DESCRIPTION %s' % service['name'], file=favfile)
             else:
-                url = service.get('url')
                 servicestr = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
-                if url is not None:
-                    servicestr += urlencode(url) + ':%(name)s' % service
+                path = service.get('path')
+                if path:
+                    servicestr += bouquetencode(path) + ':' + bouquetencode(service['name'])
                 print(servicestr, file=favfile)
 
 def genfav():
