@@ -349,7 +349,7 @@ def writefavfile(rule):
                 servicestr = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
                 path = service.get('path')
                 if path:
-                    servicestr += bouquetencode(path) + ':' + bouquetencode(service['name'])
+                    servicestr += bouquetencode(path % service) + ':' + bouquetencode(service['name'])
                 print(servicestr, file=favfile)
 
 def genfav():
