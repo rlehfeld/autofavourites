@@ -145,9 +145,18 @@ class config(object):
                 kv[k] = []
             kv[k].append(v)
 
+        name = re.sub(r'\s+', ' ', re.sub(r'[\x86\x87]', '', servicename))
+
+        m = re.findall(r'\x86(.*?)\x87', servicename)
+        if m:
+            short_name = re.sub(r'\s+', ' ', ''.join(m))
+        else:
+            short_name = name
+
         kv.update(
             {
-                'name': re.sub(r'[^\w\s{}()\[\]+\-.]', '', servicename),
+                'name': name,
+                'short_name': short_name,
                 'sid': int(ref[0], 16),
                 'ns': int(ref[1], 16),
                 'tsid': int(ref[2], 16),
