@@ -276,7 +276,7 @@ class Tuple(tuple):
 
 def splitchannel(service):
     channel = service['name'].lower()
-    split = list(re.findall(r'[^\d\s]+|\d+', re.sub(r'[^\w\s]', '', channel)))
+    split = list(re.findall(r'[a-z]+|\d+', channel))
     split.append(channel)
     t = Tuple(integer(t) for t in split)
     return t
