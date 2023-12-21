@@ -147,7 +147,7 @@ class config(object):
 
         kv.update(
             {
-                'name': re.sub(r'[^\w\s{}()\[\]]', '', servicename),
+                'name': re.sub(r'[^\w\s{}()\[\]+\-.]', '', servicename),
                 'sid': int(ref[0], 16),
                 'ns': int(ref[1], 16),
                 'tsid': int(ref[2], 16),
@@ -260,14 +260,16 @@ class Tuple(tuple):
             if k != v:
                 if isinstance(k, type(v)):
                     return k < v
-                if isinstance(k, str):
+                if not isinstance(k, int):
                     return True
                 return False
         return False
 
 def splitchannel(service):
-    channel = re.sub(r'[^\w\s]', '', service['name'])
-    t = Tuple(integer(t) for t in re.findall(r'[^\d\s]+|\d+', channel.lower()))
+    channel = service['name'].lower()
+    split = list(re.findall(r'[^\d\s]+|\d+', re.sub(r'[^\w\s]', '', channel)))
+    split.append(channel)
+    t = Tuple(integer(t) for t in split)
     return t
 
 def loadservices(rule):
@@ -291,11 +293,18 @@ def loadservices(rule):
                         if not isepgservice(service, transponders, transponser):
                             continue
                         transponders.append(transponder)
-                        addservice = servoce
+                        addservice = service.copy()
                     else:
+                        # TODO: add this to epgrefresh bouquet automatically
                         addservice = service.copy()
                         addservice['icam'] = station.get('icam', False)
 
+                    addservice.update(
+                        {
+                            'reftype': 1,
+                        }
+                    )
+                    addservice.update(station.get('replace', {}))
                     services.append(addservice)
 
         for service in sorted(services, key=splitchannel):
@@ -314,14 +323,16 @@ def writefavfile(rule):
         print(u'#NAME %s' % rule['name'], file=favfile)
         for service in loadservices(rule):
             if service.get('icam', False):
-                description = re.sub(r'[^\w\s]', '', service['name'])
-                description = re.sub(r'\s+', ' ', description)
-                url = CONFIG.get_icamprefix() + u'/1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
-                serviceinfo = u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
-                print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), description), file=favfile)
-                print(u'#DESCRIPTION %s' % description, file=favfile)
+                url = CONFIG.get_icamprefix() + u'/%(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
+                serviceinfo = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:21:0:0:0' % service
+                print(u'%s:%s:%s' % (serviceinfo, url.replace(':', '%3a'), service['name']), file=favfile)
+                print(u'#DESCRIPTION %s' % service['name'], file=favfile)
             else:
-                print(u'#SERVICE 1:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service, file=favfile)
+                url = service.get('url')
+                servicestr = u'#SERVICE %(reftype)d:0:%(stype)X:%(sid)X:%(tsid)X:%(onid)X:%(ns)X:0:0:0:' % service
+                if url is not None:
+                    servicestr += url.replace(':', '%3a') + ':%(name)s' % service
+                print(servicestr, file=favfile)
 
 def genfav():
     rules = CONFIG.get_rules()
