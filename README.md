@@ -9,7 +9,7 @@ Is possible too update satellites.xml from OE-Alliance or other sources.
 ~~opkg install enigma2-plugin-extensions-autofavourites.ipk~~
 
 ## Usage
-Create a file /etc/bouquetRules.json with content as example:
+Create a file /etc/enigma2/bouquetRules.json with content as example:
 ```
 {
     "rules": [

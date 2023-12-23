@@ -1,0 +1,38 @@
+{
+    "rules": [
+        {
+            "name": "Hauptsender",
+            "stations": [
+                {"regexp": "^Das Erste HD$", "ns": "c00000"},
+                {"regexp": "^ZDF HD$", "ns": "c00000"}
+            ]
+        },
+        {
+            "name": "dritte-regional",
+            "stations": [
+                {
+                    "p": ["ARD", "BMT"],
+                    "!regexp": "(?i)arte|ARD|Erste|tagesschau|phoenix|ONE|Mediathek",
+                    "ns": "c00000"
+                },
+                {
+                    "regexp": "(?i)DR",
+                    "p": "SES ASTRA",
+                    "ns": "c00000"
+                },
+                {
+                    "regexp": "(?i)(?:^|\\W)(?:rhein\\smain|REGIO|Baden|SACHSEN|rfo)(?:\\W|$)",
+                    "ns": "c00000"
+                },
+                {
+                    "regexp": "(?i)(?:^|\\W)L-TV(?:\\W|$)",
+                    "ns": "c00000",
+                    "replace": {
+                        "reftype": 4097,
+                        "path": "https://live2.telvi.de/hls/l-tv_s1_hd720.m3u8"
+                    }
+                }
+            ]
+        }
+    ]
+}
