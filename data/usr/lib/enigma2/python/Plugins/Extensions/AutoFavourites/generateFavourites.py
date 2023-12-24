@@ -260,26 +260,32 @@ def integer(value):
     except ValueError:
         return value
 
-class Tuple(tuple):
-    def __new__(self, *args):
-        return tuple.__new__(Tuple, tuple(*args))
+class Any(object):
+    def __init__(self, value):
+        self._value = value
 
     def __lt__(self, other):
-        for k, v in zip(self, other):
-            if k != v:
-                if isinstance(k, type(v)):
-                    return k < v
-                if not isinstance(k, int):
-                    return True
-                return False
+        if self._value != other._value:
+            if isinstance(self._value, type(other._value)):
+                return self._value < other._value
+            if not isinstance(self._value, int):
+                return True
         return False
+
+    def __gt__(self, other):
+        return other < self
+
+    def __eq__(self, other):
+        return self._value == other._value
+
+    def get(self):
+        return self._value
 
 def splitchannel(service):
     channel = service['name'].lower()
     split = list(re.findall(r'[a-z]+|\d+', channel))
     split.append(channel)
-    t = Tuple(integer(t) for t in split)
-    return t
+    return tuple(Any(integer(t)) for t in split)
 
 def loadservices(rule):
     allservices = []
